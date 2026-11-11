@@ -1,0 +1,24 @@
+# Dependências e artefactos locais
+node_modules/
+dist/
+data/
+.video/
+*.log
+
+# Vídeo de apresentação e material de apoio (não fazem parte da aplicação)
+hangar-apresentacao.mp4
+hangar-apresentacao.pptx
+hangar-shots.mp4
+hangar-gestao-video.py
+"Hangar AI Cockpit Demo.mp4"
+perfil.png
+
+# Ferramentas de desenvolvimento locais
+.freebuff/
+.playwright-mcp/
+.probe-startup.js
+.serena/
+
+# Sistema
+Thumbs.db
+desktop.ini

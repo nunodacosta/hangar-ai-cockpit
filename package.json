@@ -1,0 +1,58 @@
+{
+  "name": "hangar",
+  "version": "1.0.0",
+  "description": "Hangar - AI Cockpit: gestor local de agentes e modelos de IA (CLI) com consola integrada",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "web": "node server.js",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^45.3.0",
+    "electron-builder": "^25.1.8"
+  },
+  "author": "ALDACO",
+  "build": {
+    "appId": "com.aldaco.hangar",
+    "productName": "Hangar - AI Cockpit",
+    "npmRebuild": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "server.js",
+      "public/**",
+      "build/icon*"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": true
+    },
+    "portable": {
+      "artifactName": "Hangar_Portable.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Hangar_Setup.exe",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    }
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "node-pty": "^1.1.0"
+  }
+}

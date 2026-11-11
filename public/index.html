@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="pt"><head><meta charset="utf-8">
+<meta name="t" content="__TOKEN__"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hangar — AI Cockpit</title>
+<link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/vendor/xterm.css">
+<style>
+:root{--bg:#f5f6f8;--pn:#fff;--bd:#e3e6ec;--tx:#1d2330;--mu:#6b7385;--ac:#4f7cff;--dg:#e5484d;--hv:#eef1f7}
+@media(prefers-color-scheme:dark){:root{--bg:#14171d;--pn:#1b1f27;--bd:#2a303b;--tx:#e6e9f0;--mu:#8b93a5;--hv:#242a35}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ac) 55%,var(--bd)) transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-track-piece{margin:3px;border:2px solid transparent;border-radius:999px;background:color-mix(in srgb,var(--ac) 9%,var(--bg));background-clip:padding-box}
+::-webkit-scrollbar-track-piece:start,::-webkit-scrollbar-track-piece:end{border-radius:999px}
+::-webkit-scrollbar-thumb{min-height:28px;border:2px solid transparent;border-radius:999px;background-color:color-mix(in srgb,var(--ac) 60%,var(--bd));background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background-color:var(--ac)}
+::-webkit-scrollbar-corner{background:transparent}
+body{font:14px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--tx);display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg{width:18px;height:18px;display:block}
+.tb{height:42px;display:flex;align-items:center;background:var(--pn);border-bottom:1px solid var(--bd);-webkit-app-region:drag;app-region:drag;padding-left:12px;flex:none;
+ padding-right:env(titlebar-area-x,0)}
+.tb .logo{width:24px;height:24px;margin-right:10px}.tb b{font-weight:600;letter-spacing:.2px}.tb .brand{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05;margin:1px 0}.tb .brand b{font-size:15px}.tb-sub{color:var(--mu);font-weight:600;font-size:9px;white-space:nowrap}.sp{flex:1}
+.wc{display:flex;height:100%;-webkit-app-region:no-drag;app-region:no-drag}
+.wc button{width:46px;display:grid;place-items:center;color:var(--mu)}.wc button:hover{background:var(--hv);color:var(--tx)}
+.wc button.x:hover{background:var(--dg);color:#fff}
+.main{flex:1;display:flex;min-height:0}
+aside{width:290px;flex:none;background:var(--pn);border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:0}
+.srch{display:flex;margin:12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg)}
+.srch:focus-within{border-color:var(--ac)}
+.srch input{flex:1;min-width:0;border:0;background:none;outline:0;padding:9px 12px;color:var(--tx);font:inherit}
+.ib{width:36px;height:36px;display:grid;place-items:center;border-radius:8px;color:var(--mu)}
+.ib:hover{background:var(--hv);color:var(--tx)}.ib.dg:hover{color:var(--dg)}.ib.off{opacity:.4;cursor:default}.ib.off:hover{background:none;color:var(--mu)}
+#un:not(.off){color:var(--dg)}
+#un:not(.off):hover{background:color-mix(in srgb,var(--dg) 12%,transparent);color:var(--dg)}
+#launch.on{color:#1f9d55}
+#launch.on:hover{background:color-mix(in srgb,#1f9d55 12%,transparent);color:#1f9d55}
+.list{flex:1;overflow:auto;padding:0 8px 12px}
+.it{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer}
+.it:hover{background:var(--hv)}.it.on{background:color-mix(in srgb,var(--ac) 12%,transparent)}
+.it input{accent-color:var(--dg);margin:0}.it .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it small,.it-choice small{color:var(--mu)}
+.list-group{margin-bottom:14px}.list-group-title{margin:8px 10px 5px;color:var(--mu);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.it-row{display:flex;align-items:center;gap:3px}.it-row>.it{flex:1;min-width:0}.it-choice{display:flex;flex:1;align-items:center;gap:10px;min-width:0;padding:9px 10px;border-radius:10px;cursor:pointer}.it-choice:hover{background:var(--hv)}.it-choice.on{background:color-mix(in srgb,var(--ac) 12%,transparent)}.it-choice input{accent-color:var(--dg);margin:0}.it-choice .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.it-choice.broken .n{color:var(--mu);text-decoration:line-through}.it-choice.broken small{color:#e0a33a}
+.it-card{display:block;border:1px solid var(--bd);border-radius:11px;padding:10px 11px;margin-top:8px;background:var(--pn);cursor:pointer;transition:border-color .15s,background .15s}
+.it-card:hover{border-color:color-mix(in srgb,var(--ac) 45%,var(--bd))}
+.it-card.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 8%,transparent)}
+.it-card .it-head{display:flex;align-items:center;gap:9px;min-width:0}
+.it-card .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:13px}
+.it-card small{display:block;margin-top:5px;color:var(--mu);font-size:11px}
+.it-card input{accent-color:var(--ac);margin:0;width:15px;height:15px;flex:none}
+.it-card.broken .n{color:var(--mu);text-decoration:line-through}
+.list.danger .it-card input{accent-color:var(--dg)}
+.list.danger .it-card.on{border-color:var(--dg);background:color-mix(in srgb,var(--dg) 8%,transparent)}
+.list.chat .it-card input{accent-color:#1f9d55}
+.list.chat .it-card.on{border-color:#1f9d55;background:color-mix(in srgb,#1f9d55 8%,transparent)}
+.it-launch{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:8px;color:var(--mu)}.it-launch:hover{color:var(--ac)}.it-launch svg{width:16px;height:16px}
+
+.empty{color:var(--mu);text-align:center;padding:40px 20px}
+section{flex:1;display:flex;flex-direction:column;min-width:0}
+.hd{position:sticky;top:0;z-index:5;height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--bd)}
+.hd h2{flex:1;margin:0;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.body{flex:1;overflow:auto;padding:20px}
+.terminal-panel{position:relative;flex:1;min-width:0;min-height:0;margin:16px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #29313e;border-radius:14px;background:#111720;color:#d7e2ee;font:13px/1.5 Consolas,"Cascadia Mono",monospace}
+.terminal-meta{border-radius:13px 13px 0 0}
+.terminal-output{position:relative;width:100%;min-width:0;min-height:0;overflow:hidden;contain:paint}
+.terminal-session-output{width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;contain:paint}
+.terminal-session-output[hidden]{display:none}
+.terminal-output .xterm{width:100%;height:100%}.terminal-output .xterm-screen{width:100%}
+.terminal-panel[hidden]{display:none}
+.terminal-meta{position:relative;height:42px;min-width:0;flex:none;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:1px solid #29313e;color:#aab8ca;overflow:hidden}
+.terminal-meta::after{position:absolute;z-index:3;left:12px;bottom:0;width:104px;height:1px;background:#111720;content:"";pointer-events:none}
+.terminal-shell-label{position:relative;z-index:2;flex:none;width:104px;height:32px;align-self:flex-end;display:flex;align-items:center;justify-content:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid #52627a;border-radius:9px 9px 0 0;background:#111720;color:#e3ebf5}
+.terminal-tab-carousel{position:absolute;z-index:1;inset:0 84px 0 120px;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;scrollbar-width:none}
+.terminal-meta-new{position:relative;z-index:2;flex:none;align-self:center;color:#aab8ca}
+.terminal-meta-new:hover{color:#e3ebf5}
+.terminal-tab-carousel::-webkit-scrollbar{display:none}
+.terminal-tabs{height:100%;width:max-content;max-width:none;display:flex;align-items:flex-end;gap:2px;will-change:transform}
+.terminal-tab{max-width:190px;height:32px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 11px;border:1px solid #29313e;border-bottom:0;border-radius:9px 9px 0 0;background:#0d131d;color:#aab8ca;box-shadow:0 1px 0 #0d131d}
+.terminal-tab:hover{color:#e3ebf5;background:#18212d;box-shadow:0 1px 0 #18212d}
+.terminal-tab.active{border-color:#52627a;background:#111720;color:#e3ebf5;box-shadow:0 1px 0 #111720}
+.terminal-meta-close{position:relative;z-index:2;flex:none;margin-left:auto;background:#111720}
+.terminal-output{flex:1;min-height:0;overflow:hidden;padding:8px}
+.terminal-output .xterm{height:100%}.terminal-output .xterm-viewport{border-radius:8px;scrollbar-color:#58677f #171e28}
+.terminal-output .xterm-viewport::-webkit-scrollbar-track,.terminal-output .xterm-viewport::-webkit-scrollbar-track-piece,.terminal-output .xterm-viewport::-webkit-scrollbar-thumb{border-radius:999px}
+.terminal-context{position:fixed;z-index:90;left:0;top:0;touch-action:none}
+.terminal-context-toggle{width:38px;height:38px;display:grid;place-items:center;border:1px solid #39465b;border-radius:50%;background:#1b2533;color:#d7e2ee;box-shadow:0 4px 14px #0008;cursor:grab}
+.terminal-context-toggle.dragging{cursor:grabbing}
+.terminal-context-toggle:hover,.terminal-context-toggle[aria-expanded="true"]{color:#8ab4ff;border-color:#6888bd}
+.terminal-context-toggle svg{width:18px;height:18px}
+.terminal-context-menu{position:absolute;bottom:46px;left:0;width:38px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid #39465b;border-radius:22px;background:#1b2533;box-shadow:0 8px 26px #0009}
+.terminal-context-menu[hidden]{display:none}
+.terminal-context-menu button{width:30px;height:30px;flex:none;display:grid;place-items:center;padding:0;border:1px solid #39465b;border-radius:50%;background:#202b3a;color:#d7e2ee}
+.terminal-context-menu button:hover{border-color:#6888bd;color:#8ab4ff}
+.terminal-context-menu button svg{width:15px;height:15px}
+.terminal-context-menu .context-directory{position:absolute;left:46px;bottom:0;max-width:min(280px,50vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 8px;border:1px solid #39465b;border-radius:8px;background:#1b2533;color:#aab8ca;font-size:11px}
+.model-chat-composer{display:flex;flex:none;gap:8px;align-items:flex-end;padding:10px 12px;border-top:1px solid #29313e;background:#151d28}
+.model-chat-composer[hidden]{display:none}
+.model-chat-composer textarea{flex:1;min-width:0;min-height:38px;max-height:110px;resize:vertical;padding:9px 10px;border:1px solid #39465b;border-radius:9px;outline:0;background:#101720;color:#e3ebf5;font-family:inherit;font-size:13px;line-height:1.4}
+.model-chat-composer textarea:focus{border-color:#6888bd}
+.model-chat-composer button{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:9px;color:#d7e2ee}
+.model-chat-composer button:hover{color:#8ab4ff;background:#263347}
+.model-chat-composer button:disabled{opacity:.45}
+.model-chat-note{flex:none;padding:0 12px 8px;background:#151d28;color:#aab8ca;font-size:10px}
+.cli-help-panel{flex:1;min-height:0;overflow:auto;padding:20px}
+.cli-help-panel[hidden]{display:none}
+.cli-help-content{max-width:900px;margin:0 auto}
+.cli-help-content h3{margin:20px 0 8px;font-size:15px}.cli-help-content p{color:var(--mu)}
+.cli-help-card{margin:10px 0;padding:14px;border:1px solid var(--bd);border-radius:12px;background:var(--pn)}
+.cli-help-card header{display:flex;align-items:center;gap:8px}.cli-help-card header h4{flex:1;margin:0;font-size:14px}
+.cli-help-card code{display:block;overflow:auto;padding:10px;border-radius:8px;background:var(--bg);font:13px/1.5 Consolas,"Cascadia Mono",monospace;white-space:pre}
+.cli-help-card .ib{flex:none}.cli-native-help{max-height:42vh;overflow:auto;white-space:pre;overflow-wrap:normal;padding:14px;border:1px solid var(--bd);border-radius:10px;background:var(--pn);font:12px/1.5 Consolas,"Cascadia Mono",monospace}
+.cli-help-content .help-state{color:var(--mu)}
+#cli-help.on{color:var(--ac)}#cli-help:disabled{opacity:.35;cursor:not-allowed}
+#launch.on{color:#1f9d55}#rs:disabled{opacity:.55;cursor:wait}
+.card{background:var(--pn);border:1px solid var(--bd);border-radius:14px;padding:18px;max-width:760px;margin:0 auto 16px}
+.card h3{margin:0 0 4px;font-size:15px}.card p{margin:0 0 12px;color:var(--mu)}
+.pr{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--bd);border-radius:10px;margin-top:8px;cursor:pointer;word-break:break-all}
+.pr input{accent-color:var(--dg);margin:0;flex:none}.pr.on{border-color:var(--dg)}
+.bar{height:4px;background:color-mix(in srgb,var(--ac) 12%,var(--bd));border-radius:999px;overflow:hidden;display:none;flex:none}.bar i{display:block;height:100%;width:30%;border-radius:inherit;background:var(--ac);animation:s 1.1s infinite ease-in-out}
+@keyframes s{0%{margin-left:-30%}100%{margin-left:100%}}
+.st{padding:6px 16px;color:var(--mu);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-top:1px solid var(--bd);background:var(--pn);flex:none}
+.project-credit{height:30px;flex:none;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 12px;border-top:1px solid var(--bd);background:var(--pn);color:var(--mu);font-size:11px;letter-spacing:.1px}
+.project-credit .ai-symbol{width:14px;height:14px;flex:none;color:var(--ac)}
+.rec{font-weight:600}
+.rec-good{color:#2da44e}.rec-fair{color:#d29922}.rec-bad{color:var(--dg)}.rec-none{color:var(--mu)}
+.freshness{padding:3px 7px;border-radius:999px;font-size:11px;font-weight:600}
+.freshness.is-new{background:color-mix(in srgb,#2da44e 16%,var(--pn));color:#2da44e}
+.freshness.changed{background:color-mix(in srgb,var(--ac) 14%,var(--pn));color:var(--ac)}
+.freshness.stale{background:color-mix(in srgb,var(--dg) 12%,var(--pn));color:var(--dg)}
+#dlg{position:fixed;inset:0;z-index:98;background:rgba(10,12,18,.45);display:none;place-items:center}#dlg.v{display:grid}
+.dbox{background:var(--pn);border:1px solid var(--bd);border-radius:14px;padding:18px;width:min(520px,90vw);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.dbox pre{margin:0 0 14px;max-height:50vh;overflow:auto;white-space:pre-wrap;word-break:break-all;font:13px/1.5 inherit}.dbox .ac{display:flex;justify-content:flex-end;gap:6px}
+#tip{position:fixed;z-index:99;max-width:240px;padding:7px 10px;border-radius:8px;background:#222a38;color:#fff;font-size:12px;pointer-events:none;opacity:0;transition:opacity .12s}
+#tip.v{opacity:1}#tip i{position:absolute;width:10px;height:10px;background:#222a38;transform:rotate(45deg)}
+#toast-stack{position:fixed;z-index:110;right:18px;bottom:18px;display:grid;gap:8px;width:min(390px,calc(100vw - 36px));pointer-events:none}
+.toast{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--bd);border-left:4px solid var(--ac);border-radius:11px;background:var(--pn);box-shadow:0 8px 26px rgba(0,0,0,.18);pointer-events:auto;animation:toast-in .16s ease-out}
+.toast[data-kind="success"]{border-left-color:#2da44e}.toast[data-kind="warning"]{border-left-color:#d29922}.toast[data-kind="error"]{border-left-color:var(--dg)}
+.toast-icon{flex:none;color:var(--ac)}.toast[data-kind="success"] .toast-icon{color:#2da44e}.toast[data-kind="warning"] .toast-icon{color:#d29922}.toast[data-kind="error"] .toast-icon{color:var(--dg)}
+.toast-message{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.toast-action{flex:none;padding:2px 0;color:var(--ac);font-weight:600}.toast-action:hover{text-decoration:underline}
+.toast-close{flex:none;padding:0 2px;color:var(--mu);font-size:18px;line-height:1}
+@keyframes toast-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#model-body{position:relative;padding:16px;overflow:auto}
+.source-panel{width:260px;flex:none;border-left:1px solid var(--bd);background:var(--pn);display:flex;flex-direction:column;min-height:0}
+.source-panel h3{margin:0;padding:17px 16px 10px;font-size:14px}
+.source-panel p{margin:0;padding:0 16px 12px;color:var(--mu);font-size:12px}
+.add-source{display:flex;gap:6px;margin:0 10px 10px;padding:0 4px;border:1px solid var(--bd);border-radius:10px;background:var(--bg)}
+.add-source:focus-within{border-color:var(--ac)}
+.add-source input{flex:1;min-width:0;border:0;outline:0;background:transparent;padding:9px 7px;color:var(--tx);font:inherit;font-size:12px}
+.add-source .ib{flex:none}
+#source-list{flex:1;overflow:auto;padding:0 10px 12px}
+.source-link{display:block;padding:11px 10px;margin-bottom:5px;border:1px solid var(--bd);border-radius:10px;color:var(--tx);text-decoration:none}
+.source-link:hover{border-color:var(--ac);background:var(--hv)}
+.source-link.active{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 9%,var(--pn))}
+.source-link b,.source-link small{display:block;overflow:hidden;text-overflow:ellipsis}
+.source-link small{margin-top:4px;color:var(--mu);font-size:11px}
+.search-history{min-height:0;max-height:42%;overflow:auto;border-top:1px solid var(--bd);padding:10px}
+#model-body .search-history{max-height:none;margin:16px auto 0;max-width:1100px}
+.agent-catalog-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:8px}
+.agent-catalog-list .source-link{margin:0}
+.search-history h3{margin:0;padding:2px 6px 8px;font-size:12px;color:var(--mu)}
+.search-history-entry{padding:8px;margin-bottom:6px;border:1px solid var(--bd);border-radius:9px}
+.search-history-query{display:block;width:100%;padding:0 0 5px;text-align:left;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-history-query:hover,.search-history-model:hover{color:var(--ac)}
+.search-history-model{display:block;padding:3px 0;color:var(--mu);font-size:11px;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-history-meta{color:var(--mu);font-size:10px}
+.search-history-entry details{margin-top:5px;color:var(--mu);font-size:10px}
+.search-history-entry summary{cursor:pointer}
+.source-note{padding:10px 16px;border-top:1px solid var(--bd);color:var(--mu);font-size:11px}
+.model-search{max-width:1100px;margin:0 auto 14px}
+.model-search .ib{margin:2px;flex:none}
+.installed-model-panel,.online-search-results{max-width:1100px;margin:0 auto 14px;padding:13px;background:var(--pn);border:1px solid var(--bd);border-radius:12px}
+.installed-model-panel h3,.online-search-results h3{margin:0 0 6px;font-size:14px}.installed-model-panel>header{display:flex;align-items:center;justify-content:space-between;gap:8px}.installed-model-panel>header h3{margin:0}
+.installed-model-panel p,.online-search-results p{margin:0 0 8px;color:var(--mu);font-size:12px}
+.installed-model-panel a,.online-search-results a{color:var(--ac)}
+.search-model-card{padding:10px 0;border-top:1px solid var(--bd)}
+.search-model-card h4{margin:0 0 4px;font-size:13px}
+.search-model-card p{margin:0 0 4px}
+.search-web-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.search-source-status{margin-top:8px;color:var(--mu);font-size:11px}
+.live-report{max-width:1100px;margin:0 auto 15px;padding:12px;background:var(--pn);border:1px solid var(--bd);border-radius:12px}
+.live-report h3{margin:0 0 7px;font-size:13px}
+.live-report ul{margin:0;padding-left:18px;color:var(--mu);font-size:12px}
+.live-report a{color:var(--ac)}
+.dashboard-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;max-width:1100px;margin:0 auto 14px}
+.dashboard-card{min-width:0;padding:13px;background:var(--pn);border:1px solid var(--bd);border-radius:12px}
+.dashboard-card h3{margin:0 0 7px;font-size:14px}
+.dashboard-card p{margin:4px 0;color:var(--mu);font-size:12px;overflow-wrap:anywhere}
+.dashboard-card b{color:var(--tx);font-weight:600}
+.dashboard-card .source-statuses{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.dashboard-card .source-statuses span{padding:3px 7px;border-radius:999px;background:var(--bg);color:var(--mu);font-size:10px}
+.dashboard-card .source-statuses .source-ok{color:#2da44e}
+.dashboard-card .source-statuses .source-error{color:var(--dg)}
+.agent-card{min-width:0;padding:11px;border:1px solid var(--bd);border-radius:11px;background:var(--pn)}
+.agent-card h4{margin:0 0 5px;font-size:13px;overflow-wrap:anywhere}
+.agent-card p{margin:4px 0;color:var(--mu);font-size:11px;overflow-wrap:anywhere}
+.agent-card a,.model-source-link{color:var(--ac)}
+.agent-card code{display:block;overflow:auto;margin-top:7px;padding:7px;border-radius:7px;background:var(--bg);font:11px/1.4 Consolas,"Cascadia Mono",monospace;white-space:pre}
+.model-source-link{display:inline-flex;align-items:center;margin-left:4px;font-size:12px}
+.model-groups{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:1100px;margin:0 auto}
+.model-group{min-width:0;background:var(--pn);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.model-group h3{margin:0 0 3px;font-size:15px}
+.group-hint{margin:0 0 10px;color:var(--mu);font-size:11px}
+.model-card{border:1px solid var(--bd);border-radius:11px;padding:12px;margin-top:9px}
+.model-card h4{margin:0 0 3px;font-size:14px}
+.model-card p{margin:0 0 8px;color:var(--mu);font-size:12px}
+.model-meta{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0}
+.model-meta span{padding:3px 7px;border-radius:999px;background:var(--bg);color:var(--mu);font-size:11px}
+.rank{display:grid;grid-template-columns:1fr auto;gap:3px 8px;margin-top:8px;font-size:11px;color:var(--mu)}
+.rank b{color:var(--tx);font-weight:500}
+.model-actions{display:flex;align-items:center;gap:8px;margin-top:10px}
+.install-model{display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--mu);transition:color .12s}
+.install-model:hover:not(:disabled){background:transparent;color:var(--ac)}
+.install-model:disabled{opacity:.5;cursor:default}
+.install-model svg{width:18px;height:18px}
+.install-model.viability,.install-model.viability:hover:not(:disabled){color:var(--vc)}
+.install-model.viability:hover:not(:disabled){filter:brightness(1.2)}
+.install-model.viability:disabled{opacity:.75}
+.model-progress-wrap{flex:1;min-width:0;display:grid;gap:5px}.model-progress{min-height:14px;color:var(--mu);font-size:11px;overflow-wrap:anywhere}.download-track{display:none;height:5px;border-radius:999px;overflow:hidden;background:color-mix(in srgb,var(--ac) 12%,var(--bd))}.download-track.active{display:block}.download-track i{display:block;width:0;height:100%;border-radius:inherit;background:var(--ac);transition:width .2s ease}.download-track.indeterminate i{width:32%;animation:download-slide 1s ease-in-out infinite alternate}@keyframes download-slide{from{transform:translateX(-20%)}to{transform:translateX(240%)}}
+.group-empty{padding:14px 0;color:var(--mu);font-size:12px}
+.spinner-cover{position:fixed;z-index:80;inset:42px 0 0;display:none;place-items:center;background:color-mix(in srgb,var(--bg) 82%,transparent)}
+.spinner-cover.v{display:grid}
+.spinner-box{text-align:center;background:var(--pn);border:1px solid var(--bd);border-radius:12px;padding:18px 24px;color:var(--mu)}
+.spinner{width:30px;height:30px;margin:0 auto 9px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#splash{position:fixed;z-index:90;inset:42px 0 0;display:grid;place-items:center;background:var(--bg)}
+.boot-group{display:flex;align-items:flex-start;gap:12px;width:min(760px,94vw);justify-content:center}
+.boot-icon{width:38px;height:38px;flex:none;margin-top:4px}
+.terminal{width:min(43vw,680px);min-width:min(320px,74vw);height:min(48vh,370px);min-height:260px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #3b465b;border-radius:12px;background:#10141c;color:#cbd5e1;box-shadow:0 18px 60px rgba(0,0,0,.24);font:13px/1.5 "Cascadia Code",Consolas,monospace}
+.terminal-head{display:flex;align-items:center;gap:7px;padding:10px 13px;border-bottom:1px solid #2a3241;color:#aab5c7;font-size:12px}
+.term-dot{width:9px;height:9px;border-radius:50%;background:#68758a}
+.terminal pre{flex:1;margin:0;padding:14px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.terminal .prompt{color:#7ea2ff}
+.boot-foot{padding:8px 13px;border-top:1px solid #2a3241;color:#8490a2;font-size:11px}
+@media(max-width:850px){.source-panel{width:205px}.main>aside:not(.source-panel){width:220px}.terminal{width:55vw}}
+@media(max-width:700px){.source-panel{display:none}.terminal{width:72vw}.boot-group{gap:7px}.boot-icon{width:30px;height:30px}}
+</style></head><body>
+<div class="tb">
+ <img class="logo" src="/icon.svg" alt=""><div class="brand"><b>Hangar</b><span class="tb-sub">AI COCKPIT</span></div><div class="sp"></div>
+ <div class="wc" id="wc">
+  <button data-tip="Minimizar a janela" data-pos="bottom" id="bmin"></button>
+  <button data-tip="Maximizar ou restaurar o tamanho da janela" data-pos="bottom" id="bmax"></button>
+  <button class="x" data-tip="Encerrar a aplicação" data-pos="bottom" id="bx"></button>
+ </div>
+</div>
+<div class="bar" id="bar"><i></i></div>
+<div class="main" id="main-view">
+ <aside>
+  <div class="srch"><input id="q" placeholder="Pesquisar ou indicar nome…" spellcheck="false">
+   <button class="ib" id="go" data-tip="Pesquisar no sistema pelo nome indicado, a começar nas pastas do utilizador" data-pos="bottom"></button></div>
+  <div class="list" id="list"></div>
+ </aside>
+ <section>
+  <div class="hd">
+   <h2 id="ttl">Modelos recomendados</h2>
+   <button class="ib" id="refresh-models" data-tip="Consultar novamente as fontes configuradas"></button>
+   <button class="ib" id="rs" aria-label="Reanalisar instalações do sistema" data-tip="Reanalisar as localizações comuns do sistema" data-pos="bottom"></button>
+   <button class="ib" id="dp" data-tip="Pesquisa recursiva em todo o disco, pelas pastas do utilizador primeiro" data-pos="bottom"></button>
+   <button class="ib" id="cli-help" aria-label="Ajuda do CLI selecionado" data-tip="Ver comandos e exemplos do CLI selecionado" data-pos="bottom"></button>
+   <button class="ib" id="launch" aria-label="Iniciar consola interativa" data-tip="Abrir consola interativa do sistema: PowerShell ou CMD" data-pos="bottom"></button>
+   <button class="ib dg" id="un" data-tip="Desinstalar as AI assinaladas. Será pedida confirmação" data-pos="bottom-left"></button>
+  </div>
+  <div class="body" id="model-body">
+   <div class="dashboard-overview" id="dashboard-overview">
+    <article class="dashboard-card" id="host-evaluation"></article>
+    <article class="dashboard-card" id="research-evaluation"></article>
+   </div>
+   <div class="installed-model-panel" id="installed-model-info" hidden></div>
+   <div class="srch model-search"><input id="model-search" placeholder="Pesquisar modelos por área, p. ex. jurídico, saúde, automóvel…" spellcheck="false"><button class="ib" id="model-search-go" data-tip="Pesquisar online na Hugging Face e no DuckDuckGo" data-pos="bottom"></button></div>
+   <div class="online-search-results" id="online-search-results" hidden></div>
+   <div class="live-report" id="live-source-report" hidden></div>
+   <div class="model-groups">
+    <div class="model-group"><h3>Agentes — gratuitos</h3><p class="group-hint">CLIs com pacote público e instalação gratuita. Ranking por método confirmado; compatibilidade local não verificada. Preços não são inferidos.</p><div id="free-agents"></div></div>
+    <div class="model-group"><h3>Modelos — cloud / pagos</h3><p class="group-hint">A fonte precisa de indicar cloud. Não é feita inferência de preços por suposição.</p><div id="paid-models"></div></div>
+   </div>
+   <div class="model-group"><h3>Modelos — gratuitos para instalar</h3><p class="group-hint">Ranking calculado face à máquina; tamanho e benchmarks são estimativas.</p><div id="free-models"></div></div>
+   <div class="model-group"><h3>Modelos — fontes externas</h3><p class="group-hint">Resultados validados na fonte, mas não descarregados diretamente pela aplicação; consulte a origem.</p><div id="external-models"></div></div>
+   <div class="model-group"><h3>Modelos — OpenRouter</h3><p class="group-hint">Modelos publicados no OpenRouter, executados remotamente; preços e custos não são inferidos pela aplicação.</p><div id="openrouter-models"></div></div>
+   <div class="search-history" id="search-history" hidden><h3>Pesquisas por área</h3><div id="search-history-list"></div></div>
+  </div>
+  <div class="body" id="body" hidden></div>
+  <div class="cli-help-panel" id="cli-help-panel" hidden></div>
+  <div class="terminal-panel" id="terminal-panel" hidden>
+   <div class="terminal-meta"><span class="terminal-shell-label" id="terminal-shell-label">PowerShell</span><div class="terminal-tab-carousel" id="terminal-tab-carousel"><div class="terminal-tabs" id="terminal-tabs"></div></div><button class="ib terminal-meta-new" id="terminal-new" data-tip="Nova conversa com as entidades selecionadas" data-pos="bottom" aria-label="Nova conversa"></button><button class="ib terminal-meta-close" id="terminal-close" data-tip="Ocultar a consola e voltar ao painel, mantendo as sessões ativas" data-pos="bottom-left" aria-label="Fechar consola"></button></div>
+   <div class="terminal-output" id="terminal-output" aria-label="Consolas de conversa"></div>
+   <div class="terminal-context">
+    <button class="terminal-context-toggle" id="terminal-context-toggle" type="button" aria-label="Menu de contexto" aria-expanded="false" data-tip="Ctrl+arrastar para mover · opções de contexto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <div class="terminal-context-menu" id="terminal-context-menu" hidden>
+     <button id="terminal-choose-directory" type="button" data-tip="Escolher diretório" aria-label="Escolher diretório"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 9h18"/></svg></button>
+     <button id="terminal-choose-image" type="button" data-tip="Anexar imagem" aria-label="Anexar imagem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></button>
+     <button id="terminal-choose-files" type="button" data-tip="Anexar ficheiros" aria-label="Anexar ficheiros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></button>
+     <button id="terminal-clear-directory" type="button" data-tip="Limpar diretório selecionado" aria-label="Limpar diretório selecionado" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg></button>
+     <span class="context-directory" id="terminal-directory-label">Sem diretório selecionado</span>
+    </div>
+   </div>
+   <form class="model-chat-composer" id="model-chat-composer" hidden>
+    <textarea id="model-chat-input" rows="1" maxlength="12000" placeholder="Escreva uma mensagem para o modelo…" aria-label="Mensagem para o modelo"></textarea>
+    <button id="model-chat-send" type="submit" data-tip="Enviar mensagem ao modelo" aria-label="Enviar mensagem ao modelo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
+   </form>
+   <div class="model-chat-note" id="model-chat-note" hidden>Até 32 ficheiros de texto são enviados como contexto; imagens e ficheiros escolhidos podem ser anexados. O modelo não pode editar os ficheiros.</div>
+  </div>
+  <div class="spinner-cover" id="source-loading"><div class="spinner-box"><div class="spinner"></div><span>A carregar informação</span></div></div>
+  <div class="st" id="st">Pronto</div>
+ </section>
+ <aside class="source-panel">
+  <h3>Repositórios</h3><p>Adicione e consulte repositórios de modelos e agentes.</p>
+  <form class="add-source" id="add-source-form">
+   <input id="add-source-url" type="url" inputmode="url" placeholder="https://site.com" aria-label="Endereço do novo site" required>
+   <button class="ib" id="add-source-submit" type="submit" data-tip="Guardar este site e iniciar a análise" data-pos="left" aria-label="Guardar site e analisar"></button>
+  </form>
+  <div id="source-list"></div>
+ </aside>
+</div>
+<footer class="project-credit"><svg class="ai-symbol" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1.6c.9 5.6 3.9 8.6 10.4 10.4-6.5 1.8-9.5 4.8-10.4 10.4C11.1 16.8 8.1 13.8 1.6 12 8.1 10.2 11.1 7.2 12 1.6z"/></svg><span>Código escrito por AI sob direção de <b>ALDACO</b> — ideia, conceito, design, grafismo e fluxo de interação</span></footer>
+<div id="splash">
+ <div class="boot-group">
+  <img class="boot-icon" src="/icon.svg" alt="Prompt AI CLI">
+  <div class="terminal">
+   <div class="terminal-head"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span>Hangar — inicialização</span></div>
+   <pre id="boot-lines"><span class="prompt">&gt;</span> A validar o host…</pre>
+   <div class="boot-foot" id="boot-status">A validar o host</div>
+  </div>
+ </div>
+</div>
+<div id="dlg"><div class="dbox"><pre id="dtx"></pre><div class="ac"><button class="ib dg" id="dno" data-tip="Cancelar e não alterar nada" data-pos="top"></button><button class="ib" id="dok" data-tip="Confirmar" data-pos="top"></button></div></div></div>
+<div id="toast-stack" aria-live="polite" aria-relevant="additions text"></div>
+<div id="tip"><i></i><span></span></div>
+<script src="/vendor/xterm.js"></script><script src="/vendor/addon-fit.js"></script>
+<script>
+const P={search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/>',launch:'<path d="M14 4h6v6M20 4 10 14"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/>',plus:'<path d="M12 5v14M5 12h14"/>',send:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',refresh:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/>',catalog:'<path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H20v17H5.5A2.5 2.5 0 0 1 3 17.5z"/><path d="M3 5.5v12M8 7h8M8 11h8M8 15h5"/>',folderSearch:'<path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v3"/><path d="M3 6v12a2 2 0 0 0 2 2h7"/><circle cx="17" cy="16" r="3"/><path d="m19.2 18.2 2 2"/>',radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5"/><path d="M12 12l6-6"/>',install:'<path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/>',installed:'<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>',min:'<path d="M5 12h14"/>',max:'<rect x="5" y="5" width="14" height="14" rx="1"/>',res:'<rect x="4" y="8" width="12" height="12" rx="1"/><path d="M8 8V5h12v12h-4"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',ok:'<path d="M5 12l5 5 9-10"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',cliHelp:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.4 2.4 0 1 1 4.2 1.6c-1.1 1-1.8 1.2-1.8 3.4M12 17h.01"/>',warning:'<path d="M10.3 3.9 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3l-7.6-13.1a2 2 0 0 0-3.4 0z"/><path d="M12 9v4m0 3h.01"/>',linkAdd:'<path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20l1.1-1.1"/><path d="M19 16v6m-3-3h6"/>'};
+const ic=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
+const $=s=>document.querySelector(s);
+const TK=document.querySelector('meta[name=t]').content;
+const api=(u,o={})=>fetch(u,{...o,headers:{'x-token':TK,...(o.headers||{})}});
+(()=>{const b=document.querySelector('.tb .brand b'),s=document.querySelector('.tb .tb-sub');if(!b||!s)return;const t=b.getBoundingClientRect().width;s.style.letterSpacing='0px';const w=s.getBoundingClientRect().width,n=s.textContent.length;s.style.letterSpacing=Math.max(0,(t-w)/n)+'px';})();
+$('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').setAttribute('aria-label','Reanalisar instalações do sistema');$('#dp').innerHTML=ic('radar');$('#cli-help').innerHTML=ic('cliHelp');$('#launch').innerHTML=ic('launch');$('#terminal-new').innerHTML=ic('plus');$('#terminal-close').innerHTML=ic('x');$('#un').innerHTML=ic('trash');
+$('#dok').innerHTML=ic('ok');$('#dno').innerHTML=ic('x');$('#bmin').innerHTML=ic('min');$('#bmax').innerHTML=ic('max');$('#bx').innerHTML=ic('x');
+$('#refresh-models').innerHTML=ic('catalog');$('#model-search-go').innerHTML=ic('search');
+$('#add-source-submit').innerHTML=ic('linkAdd');
+let items=[],sel=new Set(),chosen=new Set(),es=null,filter='',installedModels=[],incompleteModels=[],selectedInstalledModels=new Set(),installedModelsLoaded=false,settingsLoaded=false,activeInstalledModel='',onlineSearchController=null,savedSearches=[],activeSearchId='',consoleVisible=false,helpVisible=false,helpRequest=null,helpRequestId=0,helpTargetId='',activeChatModel='',selectedDirectory='',consoleShellLabel='PowerShell',conversationTabs=[],activeConversationId='',conversationCounter=0,dashboardStartup=true;
+const key=(id,p)=>id+'|'+p;
+const st=t=>$('#st').textContent=t, busy=b=>$('#bar').style.display=b?'block':'none';
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const modelStatus=t=>st(t);
+const toastGlyph={info:'info',success:'ok',warning:'warning',error:'warning'};
+function showToast(kind,message,actionLabel='',action=null){
+ let timer;
+ const dismiss=()=>{clearTimeout(timer);toast.remove()};
+ const toast=document.createElement('div');toast.className='toast';toast.dataset.kind=kind;toast.setAttribute('role',kind==='error'?'alert':'status');
+ const icon=document.createElement('span');icon.className='toast-icon';icon.innerHTML=ic(toastGlyph[kind]||'info');
+ const text=document.createElement('span');text.className='toast-message';text.textContent=message;
+ toast.append(icon,text);
+ if(actionLabel&&action){const button=document.createElement('button');button.className='toast-action';button.textContent=actionLabel;button.onclick=()=>{dismiss();action()};toast.append(button)}
+ const close=document.createElement('button');close.className='toast-close';close.type='button';close.setAttribute('aria-label','Fechar notificação');close.textContent='×';close.onclick=dismiss;toast.append(close);
+ const stack=$('#toast-stack');stack.append(toast);
+ while(stack.children.length>4)stack.firstElementChild.remove();
+ timer=setTimeout(dismiss,kind==='error'?9000:6500);
+ return dismiss;
+}
+let hostInfo=null,catalog=[],discoveredModels=[],catalogUpdatedAt=null,sourceData=[],agentCatalog=[],sourceTimer=null,sourceController=null,activeModel='',activeSource='';
+function bootLine(text){$('#boot-lines').insertAdjacentHTML('beforeend',`\n<span class="prompt">&gt;</span> ${esc(text)}`);$('#boot-lines').scrollTop=$('#boot-lines').scrollHeight}
+function renderInstalledModelInfo(){
+ const box=$('#installed-model-info'),model=installedModels.find(item=>item.id===activeInstalledModel);
+ box.hidden=!model;if(!model)return;
+ const skills=(model.competencies||[]).join(', ')||'Competências não especificadas';
+ const size=model.estimatedGb?`~${model.estimatedGb} GB`:'tamanho não especificado';
+ const installedAt=model.installedAt?new Date(model.installedAt).toLocaleString('pt-PT'):'instalado neste dispositivo';
+ box.innerHTML=`<header><div><h3>${esc(model.name||model.id)} — instalado</h3></div><button class="ib" data-launch-installed-model="${esc(model.id)}" data-tip="Iniciar ${esc(model.name||model.id)}" aria-label="Iniciar ${esc(model.name||model.id)}">${ic('launch')}</button></header>
+  <p>${esc(model.description||'Modelo local instalado através do Ollama. Consulte a página da fonte para a descrição e documentação completas.')}</p>
+  <p><b>Competências:</b> ${esc(skills)} · <b>Tamanho estimado:</b> ${esc(size)} · <b>Instalado:</b> ${esc(installedAt)}</p>
+  <p><b>Remoção:</b> gerida pelo Ollama; a aplicação não apaga pastas manualmente.</p>
+  ${model.sourceUrl?`<a href="${esc(model.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ajuda e informação do modelo</a>`:''}`;
+}
+function renderInstalledModelHelp(model){
+ const commands=[['Iniciar','ollama run', 'Inicia uma conversa interativa com este modelo.'],['Informação','ollama show', 'Mostra os detalhes disponibilizados pelo Ollama.']];
+ $('#cli-help-panel').innerHTML=`<div class="cli-help-content"><h2>${esc(model.name||model.id)} — ajuda do modelo selecionado</h2><p>${esc(model.description||'Modelo local gerido pelo Ollama.')}</p><p><b>Competências:</b> ${esc((model.competencies||[]).join(', ')||'Não especificadas')} · <b>Tamanho estimado:</b> ${esc(model.estimatedGb?`~${model.estimatedGb} GB`:'não especificado')}</p>${model.sourceUrl?`<p><a href="${esc(model.sourceUrl)}" target="_blank" rel="noopener noreferrer">Documentação da fonte</a></p>`:''}${commands.map(([title,prefix,description])=>{const command=`${prefix} "${model.id}"`;return `<article class="cli-help-card"><header><h4>${esc(title)}</h4><button class="ib cli-example-use" data-command="${esc(command)}" data-tip="Preencher este comando na consola" aria-label="Preencher comando na consola">${ic('launch')}</button></header><p>${esc(description)}</p><code>${esc(command)}</code></article>`}).join('')}</div>`;
+}
+const cliUsage={
+ ollama:{start:['run <modelo>','Inicia uma conversa com um modelo local.'],extras:[['list','Lista os modelos locais instalados.'],['pull <modelo>','Descarrega um modelo para utilização local.']]}
+};
+function selectedCli(){const selected=items.filter(item=>sel.has(item.id));return selected.length===1?selected[0]:selected.length===0?items.find(item=>item.id===helpTargetId)||null:null}
+function renderCliHelpPicker(){
+ const candidates=items.filter(item=>item.paths.length);
+ $('#cli-help-panel').innerHTML=`<div class="cli-help-content"><h2>Ajuda dos CLIs</h2><p>Escolha um CLI para ver como iniciar, os comandos disponíveis e exemplos.</p>${candidates.length?candidates.map(item=>`<article class="cli-help-card"><header><h4>${esc(item.name)}</h4><button class="ib cli-help-select" data-help-cli-id="${esc(item.id)}" data-tip="Abrir a ajuda de ${esc(item.name)}" aria-label="Abrir a ajuda de ${esc(item.name)}">${ic('info')}</button></header><p>${item.paths.length} executável(is) em ${new Set(item.paths.map(file=>file.replace(/[\\/][^\\/]*$/,''))).size} pasta(s)</p></article>`).join(''):'<p class="help-state">Ainda não foram detetados CLIs. Use o ícone de reanálise do sistema e tente novamente.</p>'}</div>`;
+}
+function showCliHelp(){
+ const model=installedModels.find(item=>item.id===activeInstalledModel);if(model){renderInstalledModelHelp(model);return}
+ const selected=items.filter(item=>sel.has(item.id));
+ if(selected.length===1){helpTargetId='';loadSelectedCliHelp();return}
+ helpTargetId='';renderCliHelpPicker();
+}
+function cliCommand(item,args='',shell=$('#terminal-shell-label').textContent){
+ const file=item.paths[0]||item.id,isWindows=/win/i.test(navigator.platform);
+ let executable;
+ if(isWindows&&shell==='CMD')executable=/\.ps1$/i.test(file)?`powershell.exe -NoProfile -File "${file}"`:`"${file}"`;
+ else if(isWindows){executable=`& '${file.replace(/'/g,"''")}'`}
+ else executable=`'${file.replace(/'/g,"'\\''")}'`;
+ return args?`${executable} ${args}`:executable;
+}
+function renderCliHelp(item,output='',state=''){
+ const panel=$('#cli-help-panel'),usage=cliUsage[item.id]||{},examples=[
+  {args:usage.start?.[0]||'',title:'Iniciar',description:usage.start?.[1]||'Abre o CLI; se suportado, inicia o modo interativo.'},
+  {args:'--help',title:'Comandos e opções',description:'Mostra a ajuda oficial disponibilizada por esta instalação.'},
+  {args:'--version',title:'Versão',description:'Mostra a versão instalada do CLI.'},
+  ...(usage.extras||[]).map(([args,description])=>({args,title:args.split(' ')[0],description}))
+ ];
+ panel.innerHTML=`<div class="cli-help-content"><h2>${esc(item.name)} — ajuda do CLI selecionado</h2>
+  <p>Executável: <code>${esc(item.paths[0]||item.id)}</code>. Os comandos abaixo usam o caminho detetado nesta máquina.</p>
+  ${examples.map(example=>{const command=cliCommand(item,example.args);return `<article class="cli-help-card"><header><h4>${esc(example.title)}</h4><button class="ib cli-example-use" data-command="${esc(command)}" data-tip="Preencher este comando na consola, sem o executar" data-pos="left" aria-label="Preencher comando na consola">${ic('launch')}</button></header><p>${esc(example.description)}</p><code>${esc(command)}</code></article>`}).join('')}
+  ${item.paths.length>1?`<h3>Outras instalações</h3>${item.paths.slice(1).map(file=>`<article class="cli-help-card"><header><h4>${esc(file.split(/[\\/]/).pop())}</h4><button class="ib cli-example-use" data-command="${esc(cliCommand({...item,paths:[file]},''))}" data-tip="Preencher este comando na consola, sem o executar" data-pos="left" aria-label="Preencher comando na consola">${ic('launch')}</button></header><p>Instalação alternativa detetada nesta máquina.</p><code>${esc(cliCommand({...item,paths:[file]},''))}</code></article>`).join('')}`:''}
+  <h3>Comandos publicados pelo CLI</h3><p class="help-state">${esc(state||'A carregar a ajuda nativa do executável…')}</p>
+  <pre class="cli-native-help" id="cli-native-help">${esc(output||'')}</pre></div>`;
+}
+async function loadSelectedCliHelp(){
+ if(helpRequest)helpRequest.abort();
+ const requestId=++helpRequestId,item=selectedCli();
+ if(!item){renderCliHelpPicker();return}
+ renderCliHelp(item,'','A consultar a ajuda oficial do CLI…');
+ helpRequest=new AbortController();
+ try{
+  if(item.helpText){renderCliHelp(item,item.helpText.slice(0,60000),'Ajuda obtida e guardada cifrada na última atualização.');return}
+  const response=await api('/api/cli/help',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:item.id,file:item.paths[0]}),signal:helpRequest.signal}),data=await response.json();
+  if(requestId!==helpRequestId||selectedCli()?.id!==item.id)return;
+  if(!response.ok||!data.ok)throw new Error(data.out||'Não foi possível obter a ajuda deste CLI.');
+  const clean=String(data.out||'').replace(/\u001b\[[0-?]*[ -/]*[@-~]/g,'');
+  renderCliHelp(item,clean.slice(0,60000),data.warning||'Ajuda obtida através de --help.');
+ }catch(error){
+  if(error.name==='AbortError'||requestId!==helpRequestId)return;
+  renderCliHelp(item,'',`Ajuda nativa indisponível: ${error.message}`);
+  showToast('error',`Não foi possível obter a ajuda de ${item.name}: ${error.message}`);
+ }finally{if(requestId===helpRequestId)helpRequest=null}
+}
+$('#cli-help').onclick=()=>{
+ helpVisible=!helpVisible;consoleVisible=false;render();
+ if(helpVisible)showCliHelp();
+};
+$('#cli-help-panel').addEventListener('click',event=>{
+ const pickerButton=event.target.closest('.cli-help-select');
+ if(pickerButton){helpTargetId=pickerButton.dataset.helpCliId||'';render();loadSelectedCliHelp();return}
+ const button=event.target.closest('.cli-example-use');if(!button)return;
+ startConsoleWithCommand(button.dataset.command||'');
+});
+async function loadInstalledModels(){
+ const response=await api('/api/models/installed'),data=await response.json();
+ if(!response.ok)throw new Error(data.out||'Falha ao carregar os modelos instalados.');
+ installedModels=Array.isArray(data.models)?data.models:[];
+ incompleteModels=Array.isArray(data.broken)?data.broken:[];
+ installedModelsLoaded=true;
+ if(incompleteModels.length)showToast('info',`${incompleteModels.length} modelo(s) incompleto(s) não listado(s): ${incompleteModels.map(model=>model.id).join(', ')}.`);
+ for(const modelId of selectedInstalledModels)if(!installedModels.some(model=>model.id===modelId))selectedInstalledModels.delete(modelId);
+ if(activeInstalledModel&&!installedModels.some(model=>model.id===activeInstalledModel))activeInstalledModel='';
+ render();
+}
+function modelScores(model,peers=catalog){
+ const gb=1024**3,ram=(hostInfo&&hostInfo.memory&&hostInfo.memory.totalBytes||0)*0.68/gb;
+ const gpu=(hostInfo&&hostInfo.gpu||[]).map(g=>Number(g.memoryBytes)||0).filter(Boolean).reduce((a,b)=>Math.max(a,b),0)/gb;
+ const disk=(hostInfo&&hostInfo.storage||[]).map(d=>Number(d.freeBytes)||0).filter(Boolean).reduce((a,b)=>Math.max(a,b),0)/gb;
+ const usable=Math.max(gpu,ram),size=Number(model.estimatedGb),params=Number(model.paramsB);
+ const hasSize=Number.isFinite(size)&&size>0;
+ const fit=hasSize&&usable?Math.max(0,Math.min(100,Math.round(100*usable/size))):null;
+ const diskFit=hasSize&&disk?Math.max(0,Math.min(100,Math.round(100*disk/(size*1.15)))):null;
+ const sizePerformance=fit===null?null:Math.round(fit*0.8+(diskFit===null?fit:diskFit)*0.2);
+ const qualityPotential=params>0?Math.round(Math.min(100,100*Math.log1p(params)/Math.log1p(70))):null;
+ const speed=hasSize&&usable?Math.max(0,Math.min(100,Math.round(100/(1+size/Math.max(usable,1))))):null;
+ const qualityPerformance=qualityPotential===null||speed===null?null:Math.round(qualityPotential*0.65+speed*0.35);
+ const communityMetric=m=>Number(m.pulls)||Number(m.downloads)||Number(m.stars)||Number(m.likes)||0;
+ const maxDemand=Math.max(1,...peers.map(communityMetric));
+ const demand=Math.round(100*Math.log1p(communityMetric(model))/Math.log1p(maxDemand));
+ const score=Math.round((sizePerformance||0)*0.4+(qualityPerformance||0)*0.4+demand*0.2);
+ return {sizePerformance,qualityPerformance,qualityPotential,demand,score};
+}
+function freshnessBadge(item){
+ if(item.stale)return '<span class="freshness stale">Cache: fonte indisponível</span>';
+ if(item.isNew)return '<span class="freshness is-new">Novo desde a última sessão</span>';
+ if(item.changed)return '<span class="freshness changed">Alterado desde a última sessão</span>';
+ if(item.checkedAt||item.updatedAt||item.status==='ok')return '<span class="freshness">Validado · sem alterações</span>';
+ return '';
+}
+function renderDashboardSummary(){
+ const hostBox=$('#host-evaluation'),researchBox=$('#research-evaluation');
+ const gb=1024**3,host=hostInfo;
+ const memory=host?.memory?.totalBytes?`${(host.memory.totalBytes/gb).toFixed(1)} GB RAM`:'RAM indisponível';
+ const cpu=host?.cpu?`${host.cpu.model} · ${host.cpu.logicalCores} threads`:'CPU indisponível';
+ const gpu=(host?.gpu||[]).map(item=>`${item.name}${item.memoryBytes?` (${(item.memoryBytes/gb).toFixed(1)} GB)`:''}`).join(', ')||'GPU não identificada';
+ const storage=(host?.storage||[]).reduce((sum,item)=>sum+(Number(item.freeBytes)||0),0);
+ const disk=storage?`${(storage/gb).toFixed(1)} GB livres`:'armazenamento indisponível';
+ hostBox.innerHTML=`<h3>Avaliação desta máquina</h3>
+  <p><b>${esc(host?.machine||'Host por avaliar')}</b> · ${esc(host?.operatingSystem||'sistema operativo indisponível')} · ${esc(host?.architecture||'')}</p>
+  <p>${esc(cpu)}</p><p>${esc(memory)} · ${esc(gpu)} · ${esc(disk)}</p>
+  <p>Ollama: <b>${host?host.ollamaAvailable?'disponível':'não detetado':'por verificar'}</b>. Adequação local é estimada por memória e espaço, não por benchmark.${host?.collectedAt?` · atualizado ${esc(new Date(host.collectedAt).toLocaleString('pt-PT'))}`:''}</p>`;
+ const validSources=sourceData.filter(source=>source.status==='ok').length;
+ const failedSources=sourceData.filter(source=>source.status==='error').length;
+ const models=discoveredModels.length?discoveredModels:catalog;
+ const newCount=models.filter(item=>item.isNew).length+agentCatalog.filter(item=>item.isNew).length;
+ const changedCount=models.filter(item=>item.changed).length+agentCatalog.filter(item=>item.changed).length;
+ const staleCount=models.filter(item=>item.stale).length+agentCatalog.filter(item=>item.stale||item.status==='error').length;
+ const when=catalogUpdatedAt?new Date(catalogUpdatedAt).toLocaleString('pt-PT'):'sem atualização guardada';
+ researchBox.innerHTML=`<h3>Pesquisa online e comparação</h3>
+  <p><b>${validSources}</b> fonte(s) consultada(s) · <b>${agentCatalog.length}</b> agentes · <b>${models.length}</b> modelos/resultados.</p>
+  <p>${newCount} novos · ${changedCount} alterados · ${staleCount} com dados guardados por indisponibilidade da fonte.</p>
+  <p>Comparação com o último catálogo guardado (${esc(when)}). Versões e metadados são validados na fonte; compatibilidade de agentes não é presumida.</p>
+  <div class="source-statuses">${sourceData.map(source=>`<span class="${source.status==='ok'?'source-ok':source.status==='error'?'source-error':''}">${esc(source.label)} · ${source.status==='ok'?'consultada':source.status==='error'?'indisponível':'pendente'}</span>`).join('')||'<span>A aguardar consulta das fontes</span>'}</div>`;
+}
+const VIABILITY=[[95,'#16a34a','100% recomendado'],[82,'#84cc16','muito viável'],[68,'#eab308','viável'],[54,'#f2a50c','viável com limitações'],[40,'#f97316','pouco viável'],[22,'#ef4f23','desaconselhado'],[0,'#dc2626','nada recomendado']];
+function viability(model,scores=modelScores(model)){
+ if(model.access==='cloud')return {color:VIABILITY[0][1],label:'corre na cloud, sem exigências locais'};
+ const rank=Number.isFinite(Number(model.installabilityRank))&&model.installabilityRank!==null?Number(model.installabilityRank):scores.sizePerformance;
+ if(rank===null||rank===undefined||!Number.isFinite(Number(rank)))return {color:'var(--mu)',label:'sem dados suficientes'};
+ const level=VIABILITY.find(([min])=>rank>=min);
+ return {color:level[1],label:`${level[2]} (${Math.round(rank)}/100)`};
+}
+function modelCard(model,index){
+ const modelId=String(model.id||model.url||model.sourceUrl||model.name||`model-${index}`);
+ const scores=modelScores(model),metric=Number(model.pulls)||Number(model.downloads)||Number(model.stars)||0;
+ const metricLabel=model.pulls?'pulls':model.downloads?'downloads':model.stars?'estrelas':'procura sem dados';
+ const badges=[model.estimatedGb?`~${model.estimatedGb} GB`: 'tamanho por confirmar',metric?`${new Intl.NumberFormat('pt-PT',{notation:'compact'}).format(metric)} ${metricLabel}`:metricLabel];
+ const competencies=(model.competencies||[]).join(', ')||'Competências não detalhadas';
+ const installed=installedModels.some(item=>item.id===modelId);
+ const installable=model.access==='free'&&!installed;
+ const buttonTip=installed?'Este modelo já está instalado':model.access!=='free'?'A aplicação não instala modelos desta fonte':hostInfo&&hostInfo.ollamaAvailable?'Instalar modelo com Ollama':'Instalar Ollama para descarregar este modelo';
+ const sourceUrl=model.sourceUrl||model.url||'';
+ const viab=viability(model,scores),vtip=`${buttonTip} · Viabilidade nesta máquina: ${viab.label}`;
+ const action=`<button class="install-model viability" style="--vc:${viab.color}" data-model="${esc(modelId)}" data-tip="${esc(vtip)}" aria-label="${esc(vtip)}" ${installable?'':'disabled'}>${ic(installed?'installed':'install')}</button>`+(!installable&&!installed&&sourceUrl?`<a class="model-source-link" href="${esc(sourceUrl)}" target="_blank" rel="noopener noreferrer">Abrir fonte</a>`:'');
+ return `<article class="model-card" data-family="${esc(String(model.family||modelId))}">
+  <h4>#${index+1} · ${esc(String(model.name||modelId))} ${freshnessBadge(model)}</h4><p>${esc(String((model.description||'').slice(0,180)))}</p>
+  <div class="model-meta">${badges.map(b=>`<span>${esc(b)}</span>`).join('')}</div>
+  <div class="rank">  <span>Possibilidade de instalação</span><b>${model.installabilityRank===null||model.installabilityRank===undefined?'sem dados':`${model.installabilityRank}/100`}</b>
+   <span>Tamanho vs. desempenho</span><b>${scores.sizePerformance===null?'sem dados':`${scores.sizePerformance}/100`}</b>
+  <span>Qualidade potencial vs. desempenho</span><b>${scores.qualityPerformance===null?'sem dados':`${scores.qualityPerformance}/100`}</b>
+   <span>Competências</span><b>${esc(competencies)}</b>
+   <span>Procura da comunidade</span><b>${scores.demand}/100${metric?` · ${new Intl.NumberFormat('pt-PT',{notation:'compact'}).format(metric)} ${metricLabel}`:''}</b>
+   <span>Versão / origem</span><b>${esc(String(model.version||model.revision||'não indicada'))} · ${esc(String(model.source||'Ollama Library'))}</b></div>
+  <div class="model-actions">${action}<div class="model-progress-wrap"><div class="download-track"><i data-download="${esc(modelId)}"></i></div><span class="model-progress" id="progress-${esc(modelId)}">${installed?'Já instalado':model.access==='external'?'Instalação local não gerida pela aplicação':''}</span></div></div>
+ </article>`;
+}
+function renderModels(){
+ const query=$('#model-search').value.trim().toLowerCase();
+ const matches=m=>!query||[m.name,m.id,m.description,...(m.competencies||[])].some(value=>String(value||'').toLowerCase().includes(query));
+ const free=catalog.filter(m=>m.access==='free'&&matches(m)).map(m=>({model:m,s:modelScores(m)})).sort((a,b)=>b.s.score-a.s.score).slice(0,12);
+ const localIds=new Set(catalog.map(model=>model.id));
+ const allDiscovered=discoveredModels.filter(model=>model.sourceId!=='ollama'&&!localIds.has(model.id));
+ const paid=[...catalog.filter(m=>m.access==='cloud'),...allDiscovered.filter(m=>m.access==='cloud')].filter(matches).map(m=>({model:m,s:modelScores(m)})).sort((a,b)=>b.s.score-a.s.score).slice(0,12);
+ const openrouter=allDiscovered.filter(m=>m.sourceId==='openrouter'&&matches(m)).map(m=>({model:m,s:modelScores(m,allDiscovered)})).sort((a,b)=>b.s.score-a.s.score).slice(0,12);
+ const external=allDiscovered.filter(m=>m.access!=='cloud'&&m.access!=='free'&&m.sourceId!=='openrouter'&&matches(m)).map(m=>({model:m,s:modelScores(m,allDiscovered)})).sort((a,b)=>b.s.score-a.s.score).slice(0,12);
+ $('#free-models').innerHTML=free.length?free.map((x,i)=>modelCard(x.model,i)).join(''):'<div class="group-empty">Nenhuma fonte consultada. Passe o rato num link à direita ou faça uma pesquisa.</div>';
+ $('#paid-models').innerHTML=paid.length?paid.map((x,i)=>modelCard(x.model,i)).join(''):'<div class="group-empty">Nenhum modelo foi identificado como cloud nas fontes atuais. Os preços não são inferidos.</div>';
+ $('#external-models').innerHTML=external.length?external.map((x,i)=>modelCard(x.model,i)).join(''):'<div class="group-empty">Nenhum resultado externo foi confirmado nas fontes consultadas.</div>';
+ $('#openrouter-models').innerHTML=openrouter.length?openrouter.map((x,i)=>modelCard(x.model,i)).join(''):'<div class="group-empty">O OpenRouter ainda não devolveu modelos. Aguarde a atualização das fontes.</div>';
+ renderAgentCatalog();renderDashboardSummary();
+}
+function renderSources(){
+ $('#source-list').innerHTML=sourceData.length?sourceData.map(source=>`<a class="source-link ${activeSource===source.id?'active':''}" href="${esc(source.url)}" target="_blank" rel="noopener noreferrer" data-source="${esc(source.id)}" ${activeSource===source.id?'aria-current="true"':''}><b>${esc(source.label)}</b><small>${esc(source.url)} · ${source.status==='ok'?'Analisado':source.status==='error'?'Falha na consulta':'Por analisar'}</small></a>`).join(''):'<div class="group-empty">Não existem repositórios configurados.</div>';
+ renderDashboardSummary();renderAgentCatalog();
+}
+function renderAgentCatalog(){
+ const box=$('#free-agents');
+ const agents=agentCatalog.filter(agent=>agent.npm||agent.pip).sort((a,b)=>(b.installabilityRank||0)-(a.installabilityRank||0));
+ box.innerHTML=agents.length?`<div class="agent-catalog-list">${agents.map(agent=>`<article class="agent-card">
+  <h4>${esc(String(agent.name))}${agent.version?` · v${esc(String(agent.version))}`:''} ${freshnessBadge(agent)}</h4>
+  <p>${esc(String(agent.description||'Metadados do pacote publicados na fonte.'))}</p>
+  <p>${agent.sizeBytes?`~${(agent.sizeBytes/1024/1024).toFixed(1)} MB · `:''}Instalação: ${agent.installabilityRank===null?'não confirmada':`${agent.installabilityRank}/100`}${agent.installed?' · detetado nesta máquina':''}</p>
+  <p>${agent.status==='error'?`Fonte indisponível: ${esc(String(agent.error||''))}`:agent.packageSource?`Versão consultada em ${esc(String(agent.packageSource))}; compatibilidade local não verificada.`:'Método de instalação não confirmado.'}</p>
+  ${agent.helpUrl?`<a href="${esc(String(agent.helpUrl))}" target="_blank" rel="noopener noreferrer">Ver pacote e documentação</a>`:''}
+  ${agent.installCommand?`<code>${esc(String(agent.installCommand))}</code>`:''}
+ </article>`).join('')}</div>`:'<div class="group-empty">Nenhum pacote de agente foi confirmado nas fontes configuradas.</div>';
+}
+function renderSearchHistory(){
+ $('#search-history').hidden=!savedSearches.length;
+ $('#search-history-list').innerHTML=savedSearches.map(search=>{
+  const modelLinks=(search.models||[]).map(model=>`<a class="search-history-model" data-search-report="${esc(search.id)}" href="${esc(model.sourceUrl||'#')}" target="_blank" rel="noopener noreferrer">${esc(model.name||model.id)} · ${esc(model.source||'Modelo')}</a>`);
+  const pages=search.webResults||[];
+  const pageLinks=pages.map(page=>`<a class="search-history-model" data-search-report="${esc(search.id)}" href="${esc(page.url)}" target="_blank" rel="noopener noreferrer">${esc(page.title||page.url)}</a>`);
+  const date=search.searchedAt?new Date(search.searchedAt).toLocaleDateString('pt-PT'):'';
+  return `<div class="search-history-entry"><button class="search-history-query" data-search-report="${esc(search.id)}">${esc(search.query)}</button>
+   <div class="search-history-meta">${modelLinks.length} modelos · ${pages.length} páginas${date?` · ${esc(date)}`:''}</div>
+   ${modelLinks.slice(0,3).join('')}${pageLinks.slice(0,2).join('')}
+   ${modelLinks.length>3||pageLinks.length>2?`<details><summary>Ver todos os resultados</summary>${modelLinks.slice(3).join('')}${pageLinks.slice(2).join('')}</details>`:''}</div>`;
+ }).join('');
+}
+async function loadSearchHistory(){
+ const response=await api('/api/models/searches'),data=await response.json();
+ if(!response.ok)throw new Error(data.out||'Falha ao carregar o histórico de pesquisa.');
+ savedSearches=Array.isArray(data.searches)?data.searches:[];
+ renderSearchHistory();
+}
+function showSavedSearch(search){
+ if(!search||(search.id===activeSearchId&&!$('#online-search-results').hidden))return;
+ activeInstalledModel='';activeSearchId=search.id;$('#model-search').value=search.query;
+ render();renderOnlineSearch(search);
+ modelStatus(`Relatório guardado carregado para “${search.query}”.`);
+}
+$('#search-history-list').addEventListener('pointerover',event=>{
+ const link=event.target.closest('[data-search-report]');if(!link||link.contains(event.relatedTarget))return;
+ showSavedSearch(savedSearches.find(search=>search.id===link.dataset.searchReport));
+});
+$('#search-history-list').addEventListener('click',event=>{
+ const link=event.target.closest('[data-search-report]');if(!link)return;
+ showSavedSearch(savedSearches.find(search=>search.id===link.dataset.searchReport));
+});
+function renderOnlineSearch(result){
+ const box=$('#online-search-results'),models=result.models||[],web=result.webResults||[];
+ const ranked=models.map(model=>({model,score:modelScores(model,models)})).sort((a,b)=>b.score.score-a.score.score);
+ const cards=ranked.map(({model,score},index)=>{
+  const metric=Number(model.pulls)||Number(model.downloads)||Number(model.stars)||Number(model.likes)||0;
+  const metricLabel=model.pulls?'pulls':model.downloads?'downloads':model.stars?'estrelas':model.likes?'gostos':'sem dados de procura';
+  const popularity=metric?`${new Intl.NumberFormat('pt-PT',{notation:'compact'}).format(metric)} ${metricLabel}`:metricLabel;
+  const installed=installedModels.some(item=>item.id===model.id);
+  const canInstall=model.installable&&!installed;
+  const tip=installed?'Este modelo já está instalado':!model.installable?'Este resultado externo não pode ser instalado diretamente':hostInfo&&hostInfo.ollamaAvailable?'Instalar modelo com Ollama':'Instalar Ollama para descarregar este modelo';
+  const competencies=(model.competencies||[]).join(', ')||'Competências não especificadas';
+  return `<article class="search-model-card"><h4>#${index+1} · <a href="${esc(model.sourceUrl||'#')}" target="_blank" rel="noopener noreferrer">${esc(model.name||model.id)}</a></h4>
+   <p>${esc(model.description||(model.source==='Ollama Library'?'Modelo disponível na Ollama Library.':'Etiquetas e identificação do modelo encontradas no Hub.'))}</p>
+   <div class="rank"><span>Possibilidade de instalação</span><b>${model.installabilityRank===null||model.installabilityRank===undefined?'sem dados':`${model.installabilityRank}/100`}</b>
+    <span>Versão / revisão</span><b>${esc(model.version||model.revision||'não indicada')}</b><span>Tamanho vs. desempenho</span><b>${score.sizePerformance===null?'sem dados':`${score.sizePerformance}/100`}</b>
+    <span>Qualidade potencial vs. desempenho</span><b>${score.qualityPerformance===null?'sem dados':`${score.qualityPerformance}/100`}</b>
+    <span>Competências / etiquetas</span><b>${esc(competencies)}</b>
+    <span>Procura da comunidade</span><b>${score.demand}/100 · ${esc(popularity)}</b></div>
+   <div class="model-actions">${(v=>`<button class="install-model viability" style="--vc:${v.color}" data-model="${esc(model.id)}" data-tip="${esc(tip+' · Viabilidade nesta máquina: '+v.label)}" aria-label="${esc(tip+' · Viabilidade nesta máquina: '+v.label)}" ${canInstall?'':'disabled'}>${ic(installed?'installed':'install')}</button>`)(viability(model,score))}<div class="model-progress-wrap"><div class="download-track"><i data-download="${esc(model.id)}"></i></div><span class="model-progress" id="progress-${esc(model.id)}">${installed?'Já instalado':model.source==='Ollama Library'?'':'Instalação local não disponível'}</span></div></div>
+   <div class="search-source-status">${esc(model.estimatedGb?`~${model.estimatedGb} GB estimados`:'Tamanho não disponível')} · fonte: ${esc(model.source||'Hugging Face Hub')}</div></article>`;
+ }).join('');
+ const links=web.map(item=>`<a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">${esc(item.title||item.url)}</a>`).join('');
+ const statuses=(result.sources||[]).map(source=>`${esc(source.label)}: ${source.ok?`${source.count} resultado(s)`:`indisponível${source.error?` (${source.error})`:''}`}`).join(' · ');
+ box.hidden=false;box.dataset.query=result.query;
+ box.innerHTML=`<h3>Relatório da pesquisa: “${esc(result.query)}”</h3>
+  <p>Ranking face ao host usando os mesmos indicadores da landing page. São estimativas baseadas em metadados, não benchmarks nem validação profissional.</p>
+  ${cards||'<p>Não foram encontrados modelos no Hugging Face para este critério.</p>'}
+  ${links?`<p><b>Páginas relacionadas</b></p><div class="search-web-links">${links}</div>`:''}
+  <div class="search-source-status">${statuses}</div>`;
+}
+async function searchOnlineModels(){
+ const query=$('#model-search').value.trim();
+ if(!query){modelStatus('Indique uma área ou competência para pesquisar modelos.');showToast('info','Escreva um critério no campo de pesquisa antes de pesquisar.');return}
+ if(onlineSearchController)onlineSearchController.abort();
+ const controller=new AbortController();onlineSearchController=controller;
+ activeInstalledModel='';render();
+ $('#source-loading').classList.add('v');modelStatus(`A pesquisar online: ${query}…`);
+ try{
+  if(!savedSearches.length){try{await loadSearchHistory()}catch(error){showToast('warning',`O histórico cifrado não foi carregado: ${error.message}`)}}
+  const response=await api(`/api/models/search?q=${encodeURIComponent(query)}`,{signal:controller.signal});
+  const data=await response.json();if(!response.ok)throw new Error(data.out||'Falha na pesquisa online.');
+  savedSearches=[data,...savedSearches.filter(search=>search.id!==data.id)].slice(0,40);
+  activeSearchId=data.id;renderSearchHistory();renderModels();renderOnlineSearch(data);
+  modelStatus(`Relatório concluído: ${(data.models||[]).length} modelos e ${(data.webResults||[]).length} páginas relacionadas.`);
+ }catch(error){if(error.name!=='AbortError'){modelStatus(`Não foi possível pesquisar online: ${error.message}`);showToast('error',`Não foi possível pesquisar online: ${error.message}`);$('#online-search-results').hidden=false;$('#online-search-results').innerHTML=`<p>${esc(error.message)}</p>`}}
+ finally{if(onlineSearchController===controller){onlineSearchController=null;$('#source-loading').classList.remove('v')}}
+}
+$('#model-search-go').onclick=searchOnlineModels;
+$('#model-search').addEventListener('keydown',event=>{if(event.key==='Enter')searchOnlineModels()});
+function renderLiveSource(result){
+ const box=$('#live-source-report'),models=result.models||[];
+ const lines=models.slice(0,5).map(m=>{
+  const metric=m.pulls?`${new Intl.NumberFormat('pt-PT',{notation:'compact'}).format(m.pulls)} pulls`:m.downloads?`${new Intl.NumberFormat('pt-PT',{notation:'compact'}).format(m.downloads)} downloads`:m.stars!==undefined?`${new Intl.NumberFormat('pt-PT',{notation:'compact'}).format(m.stars)} estrelas`: '';
+  return `<li>${m.url?`<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">${esc(m.name)}</a>`:esc(m.name)}${metric?` — ${esc(metric)}`:''}</li>`;
+ }).join('');
+ const page=result.page;
+ box.hidden=false;box.innerHTML=`<h3>${esc(result.source.label)}${page?.title?` — ${esc(page.title)}`:' — dados atualizados agora'}</h3>
+  ${page?.description?`<p>${esc(page.description)}</p>`:''}
+  ${page?.text?`<p>${esc(page.text)}</p>`:''}
+  <ul>${lines||`<li>${esc(result.summary||'Sem resultados')}</li>`}</ul>`;
+}
+$('#add-source-form').addEventListener('submit',async event=>{
+ event.preventDefault();
+ const input=$('#add-source-url'),button=$('#add-source-submit'),url=input.value.trim();
+ if(!url)return;
+ button.disabled=true;modelStatus('A validar e a guardar o site…');
+ try{
+  const response=await api('/api/sources/custom',{method:'POST',body:JSON.stringify({url})});
+  const result=await response.json();if(!response.ok)throw new Error(result.out||'Não foi possível guardar o site.');
+  sourceData=[...sourceData.filter(source=>source.id!==result.source.id),result.source];
+  renderSources();input.value='';activeSource=result.source.id;
+  showToast('info',`Site ${result.source.label} guardado. A análise vai começar.`);
+  await updateSource(result.source.id);
+ }catch(error){
+  modelStatus(`Não foi possível adicionar o site: ${error.message}`);
+  showToast('error',`Não foi possível adicionar o site: ${error.message}`);
+ }finally{button.disabled=false}
+});
+async function updateSource(source){
+if(sourceController?.sourceId===source&&!sourceController.signal.aborted)return;
+if(sourceController)sourceController.abort();
+const controller=new AbortController();controller.sourceId=source;sourceController=controller;
+const sourceInfo=sourceData.find(item=>item.id===source);
+activeSource=source;consoleVisible=false;helpVisible=false;render();$('#source-loading').classList.add('v');
+const report=$('#live-source-report');report.hidden=false;report.scrollIntoView({block:'nearest',behavior:'smooth'});
+report.innerHTML=`<h3>${esc(sourceInfo?.label||'Repositório selecionado')}</h3><p>A carregar informação deste repositório…</p>`;
+try{
+ const response=await api(`/api/source?source=${encodeURIComponent(source)}&model=${encodeURIComponent(activeModel)}`,{signal:controller.signal});
+ const result=await response.json();if(!response.ok||!result.source)throw new Error(result.out||result.summary||'Falha ao atualizar a fonte.');
+ if(sourceController!==controller||activeSource!==source)return;
+ const saved=sourceData.find(s=>s.id===source);
+ if(saved)Object.assign(saved,{status:'ok',checkedAt:new Date().toISOString(),summary:result.summary,models:result.models});
+ discoveredModels=sourceData.flatMap(item=>item.models||[]);catalogUpdatedAt=new Date().toISOString();
+ if(source==='ollama')catalog=result.models||catalog;
+ renderSources();renderModels();renderLiveSource(result);modelStatus(`${result.source.label}: ${result.summary}`);
+}catch(e){if(e.name!=='AbortError'&&sourceController===controller&&activeSource===source){const saved=sourceData.find(s=>s.id===source);if(saved){saved.status='error';saved.summary=e.message;renderSources()}report.hidden=false;report.innerHTML=`<h3>${esc(sourceInfo?.label||'Repositório selecionado')}</h3><p>Não foi possível carregar os dados deste repositório: ${esc(e.message)}</p>`;modelStatus(`Não foi possível atualizar a fonte: ${e.message}`);showToast('warning',`Não foi possível atualizar a fonte: ${e.message}`)}}
+finally{if(sourceController===controller){sourceController=null;$('#source-loading').classList.remove('v')}}
+}
+$('#source-list').addEventListener('pointerover',e=>{
+const link=e.target.closest('[data-source]');if(!link||link.contains(e.relatedTarget))return;
+if(link.dataset.source===activeSource)return;
+activeSource=link.dataset.source;
+clearTimeout(sourceTimer);sourceTimer=setTimeout(()=>{sourceTimer=null;updateSource(link.dataset.source)},300);
+});
+$('#source-list').addEventListener('click',event=>{
+const link=event.target.closest('[data-source]');if(!link)return;
+event.preventDefault();clearTimeout(sourceTimer);sourceTimer=null;
+updateSource(link.dataset.source);
+});
+$('#model-body').addEventListener('pointerover',e=>{const card=e.target.closest('.model-card');if(card)activeModel=card.dataset.family||''});
+$('#model-body').addEventListener('click',e=>{const button=e.target.closest('[data-launch-installed-model]');if(!button)return;const model=installedModels.find(item=>item.id===button.dataset.launchInstalledModel);if(model)launchInstalledModel(model)});
+$('#source-list').addEventListener('pointerleave',()=>{if(sourceTimer!==null){clearTimeout(sourceTimer);sourceTimer=null;activeSource='';renderSources()}});
+let runtimePollTimer=null,runtimePollCount=0;
+async function pollRuntimeStatus(){
+ const response=await api('/api/runtime/status'),result=await response.json();
+ if(!response.ok)throw new Error(result.out||'Falha ao verificar a instalação do Ollama.');
+ if(result.available){
+  if(runtimePollTimer){clearInterval(runtimePollTimer);runtimePollTimer=null}
+  if(hostInfo)hostInfo.ollamaAvailable=true;
+  renderModels();
+  showToast('success','O Ollama está instalado e pronto para descarregar modelos.');
+  return true;
+ }
+ return false;
+}
+function monitorRuntimeInstall(){
+ if(runtimePollTimer)clearInterval(runtimePollTimer);
+ runtimePollCount=0;
+ runtimePollTimer=setInterval(async()=>{
+  runtimePollCount++;
+  try{
+   if(await pollRuntimeStatus())return;
+   if(runtimePollCount>=150){
+    clearInterval(runtimePollTimer);runtimePollTimer=null;
+    showToast('warning','A instalação continua por confirmar. Termine o processo no terminal e volte a verificar.','Verificar',()=>monitorRuntimeInstall());
+   }
+  }catch(error){
+   clearInterval(runtimePollTimer);runtimePollTimer=null;
+   showToast('error',`Não foi possível verificar o runtime: ${error.message}`);
+  }
+ },4000);
+}
+async function beginRuntimeSetup(){
+ try{
+  const response=await api('/api/runtime/install',{method:'POST'}),result=await response.json();
+  if(result.requiresPowerShell){
+   showToast('warning','O instalador oficial do Ollama requer PowerShell. Instale-o e tente novamente.','Obter PowerShell',()=>window.open(result.downloadUrl,'_blank','noopener'));
+   return;
+  }
+  if(!response.ok)throw new Error(result.out||'Não foi possível iniciar a instalação do Ollama.');
+  if(result.alreadyInstalled){
+   if(hostInfo)hostInfo.ollamaAvailable=true;
+   renderModels();showToast('success','O Ollama já está instalado.');return;
+  }
+  showToast('info','Foi aberta uma janela de terminal para executar o instalador oficial. Termine-a para continuar.');
+  monitorRuntimeInstall();
+ }catch(error){showToast('error',`Não foi possível iniciar a instalação: ${error.message}`)}
+}
+async function installModel(modelId){
+ const selector=`[data-model="${CSS.escape(modelId)}"]`;
+ const buttons=[...document.querySelectorAll(`#free-models ${selector}, #online-search-results ${selector}`)];if(!buttons.length)return;
+ if(!hostInfo||!hostInfo.ollamaAvailable){
+  try{
+   const response=await api('/api/runtime/status'),result=await response.json();
+   if(response.ok&&result.available){if(hostInfo)hostInfo.ollamaAvailable=true;renderModels()}
+   else{showToast('warning','Ollama é necessário para descarregar modelos locais.','Instalar Ollama',beginRuntimeSetup);return}
+  }catch(error){showToast('error',`Não foi possível verificar o Ollama: ${error.message}`);return}
+ }
+ buttons.forEach(button=>button.disabled=true);
+ const progresses=[...document.querySelectorAll(`#progress-${CSS.escape(modelId)}`)],meters=[...document.querySelectorAll(`[data-download="${CSS.escape(modelId)}"]`)];progresses.forEach(progress=>progress.textContent='A iniciar…');meters.forEach(meter=>{meter.style.width='18%';meter.parentElement.classList.add('indeterminate','active')});
+ const stream=new EventSource(`/api/models/install?model=${encodeURIComponent(modelId)}&t=${encodeURIComponent(TK)}`);
+ stream.addEventListener('progress',e=>{try{const text=JSON.parse(e.data).text;progresses.forEach(progress=>progress.textContent=text);const match=String(text).match(/(\d{1,3}(?:\.\d+)?)\s*%/);if(match){const percent=Math.max(0,Math.min(100,Number(match[1])));meters.forEach(meter=>{meter.parentElement.classList.remove('indeterminate');meter.style.width=`${percent}%`})}}catch{}});
+ stream.addEventListener('done',e=>{
+  stream.close();let result={ok:false,out:'Falha no download.'};try{result=JSON.parse(e.data)}catch{}
+  progresses.forEach(progress=>progress.textContent=result.out);meters.forEach(meter=>{meter.parentElement.classList.remove('indeterminate');meter.style.width=result.ok?'100%':'0%'});buttons.forEach(button=>{
+   button.innerHTML=ic(result.ok?'installed':'install');
+   button.dataset.tip=result.ok?'Modelo instalado':`Falha na instalação: ${result.out}`;
+   button.setAttribute('aria-label',button.dataset.tip);button.disabled=result.ok;
+  });
+  if(result.ok&&result.model){
+   installedModels=[result.model,...installedModels.filter(model=>model.id!==result.model.id)];
+   sel.clear();chosen.clear();selectedInstalledModels.clear();selectedInstalledModels.add(result.model.id);
+   activeInstalledModel=result.model.id;
+   filter='';$('#q').value='';
+   $('#model-search').value='';
+   $('#online-search-results').hidden=true;
+   render();
+   document.querySelector(`#list [data-installed-model="${CSS.escape(result.model.id)}"]`)?.scrollIntoView({block:'end',behavior:'smooth'});
+   showToast('success',`${result.model.name||result.model.id} foi instalado.`);
+  }else{
+   showToast('error',result.out||'Falha ao descarregar o modelo.');
+  }
+  modelStatus(result.out);
+ });
+ stream.onerror=()=>{stream.close();buttons.forEach(button=>button.disabled=false);meters.forEach(meter=>meter.parentElement.classList.remove('indeterminate'));progresses.forEach(progress=>progress.textContent='Não foi possível comunicar com o instalador.');modelStatus('Não foi possível comunicar com o instalador.');showToast('error','Não foi possível comunicar com o instalador do modelo.')};
+}
+$('#free-models').addEventListener('click',e=>{const button=e.target.closest('[data-model]');if(button&&!button.disabled)installModel(button.dataset.model)});
+$('#online-search-results').addEventListener('click',e=>{const button=e.target.closest('[data-model]');if(button&&!button.disabled)installModel(button.dataset.model)});
+async function refreshDashboard(){
+ $('#source-loading').classList.add('v');modelStatus('A atualizar fontes web, agentes e modelos…');
+ try{
+  const hostResponse=await api('/api/host'),host=await hostResponse.json();if(!hostResponse.ok)throw new Error(host.out||'Falha ao validar o host.');hostInfo=host;
+  const response=await api('/api/models'),data=await response.json();if(!response.ok)throw new Error(data.out||'Falha ao atualizar.');
+  catalog=Array.isArray(data.models)?data.models:[];discoveredModels=Array.isArray(data.discoveredModels)?data.discoveredModels:[];catalogUpdatedAt=data.updatedAt||null;
+  agentCatalog=Array.isArray(data.agents)?data.agents:[];sourceData=Array.isArray(data.sources)?data.sources:[];
+  renderSources();renderModels();
+  await loadInstalledModels();
+  try{await scan()}catch(error){showToast('warning',`Catálogo atualizado, mas a análise de CLIs falhou: ${error.message}`)}
+  modelStatus(`Catálogo atualizado: ${catalog.length} modelos, ${agentCatalog.length} agentes e ${sourceData.length} fontes.`);
+ }catch(error){modelStatus(`Falha ao atualizar o catálogo: ${error.message}`);showToast('error',`Falha ao atualizar o catálogo: ${error.message}`)}
+ finally{$('#source-loading').classList.remove('v')}
+}
+$('#refresh-models').onclick=refreshDashboard;
+setInterval(()=>{if(!document.hidden&&!sourceController)refreshDashboard()},30*60*1000);
+$('#model-search').addEventListener('input',()=>{renderModels();if($('#online-search-results').dataset.query!==$('#model-search').value.trim())$('#online-search-results').hidden=true});
+async function bootManager(){
+ $('#boot-status').textContent='A validar o host';
+ try{
+  bootLine('A validar o host e a recolher hardware, rede e armazenamento…');
+  const hostResponse=await api('/api/host'),host=await hostResponse.json();
+  if(!hostResponse.ok)throw new Error(host.out||'Falha ao validar o host.');
+  hostInfo=host;
+  bootLine('Inventário do host atualizado e guardado cifrado.');
+ }catch(error){bootLine(`Falha na validação do host: ${error.message}`);modelStatus(`Falha na validação do host: ${error.message}`)}
+ $('#boot-status').textContent='A carregar catálogo cifrado';
+ try{
+  const [sourcesResponse,cacheResponse]=await Promise.all([api('/api/sources'),api('/api/models/cache')]);
+  const sources=await sourcesResponse.json(),cache=await cacheResponse.json();
+  if(!sourcesResponse.ok)throw new Error(sources.out||'Falha ao carregar as fontes configuradas.');
+  if(!cacheResponse.ok)throw new Error(cache.out||'Falha ao carregar o catálogo cifrado.');
+  sourceData=Array.isArray(cache.sources)&&cache.sources.length?cache.sources:Array.isArray(sources.sources)?sources.sources:[];
+  agentCatalog=Array.isArray(cache.agents)&&cache.agents.length?cache.agents:Array.isArray(sources.agents)?sources.agents:[];
+  catalog=Array.isArray(cache.models)?cache.models:[];
+  discoveredModels=Array.isArray(cache.discoveredModels)?cache.discoveredModels:sourceData.flatMap(source=>source.models||[]);
+  catalogUpdatedAt=cache.updatedAt||null;
+  renderSources();renderModels();
+  await loadInstalledModels();
+  bootLine(`${catalog.length} modelos e ${agentCatalog.length} agentes no catálogo cifrado; ${sourceData.length} fontes carregadas.`);
+  modelStatus('Host validado; a apresentar dados guardados enquanto decorre a atualização web.');
+ }catch(error){bootLine(`Falha ao carregar dados cifrados: ${error.message}`);showToast('error',`Falha ao carregar catálogo e fontes: ${error.message}`)}
+ $('#boot-status').textContent='A iniciar análise web e local';
+ setTimeout(()=>{
+  $('#splash').style.display='none';
+  if(hostInfo&&!hostInfo.ollamaAvailable)showToast('warning','Ollama ainda não está instalado. Instale o runtime para poder descarregar modelos locais.','Instalar Ollama',beginRuntimeSetup);
+  scan();
+  refreshDashboard();
+  watchInstalls();
+ },450);
+}
+let installWatch=null,installChangeRunning=false;
+function watchInstalls(){
+ if(installWatch)installWatch.close();
+ installWatch=new EventSource('/api/watch?t='+encodeURIComponent(TK));
+ installWatch.addEventListener('change',onInstallChange);
+}
+async function onInstallChange(){
+ if(installChangeRunning)return;installChangeRunning=true;
+ try{
+  const beforeAgents=new Set(items.map(i=>i.id)),beforeModels=new Set(installedModels.map(m=>m.id));
+  const result=await scan();
+  const found=new Map(result.map(r=>[r.id,r]));
+  items=items.filter(i=>i.known===false||found.has(i.id));
+  for(const i of items){const r=found.get(i.id);if(r&&i.known!==false)i.paths=i.paths.filter(p=>r.paths.includes(p))}
+  for(const id of [...sel])if(!items.some(i=>i.id===id))sel.delete(id);
+  for(const k of [...chosen])if(!items.some(i=>i.paths.some(p=>key(i.id,p)===k)))chosen.delete(k);
+  await loadInstalledModels();renderModels();
+  const addedAgents=items.filter(i=>!beforeAgents.has(i.id)).map(i=>i.name),addedModels=installedModels.filter(m=>!beforeModels.has(m.id)).map(m=>m.name||m.id);
+  const removed=[...beforeAgents].filter(id=>!items.some(i=>i.id===id)).length+[...beforeModels].filter(id=>!installedModels.some(m=>m.id===id)).length;
+  const added=[...addedAgents,...addedModels];
+  if(added.length)showToast('success',`Nova instalação de AI detetada: ${added.join(', ')}`);
+  else if(removed)showToast('warning',`${removed} instalação(ões) de AI removida(s) fora da aplicação.`);
+ }catch{}finally{installChangeRunning=false}
+}
+const pick=i=>{sel.add(i.id);i.paths.forEach(p=>chosen.add(key(i.id,p)))};
+const targets=()=>{
+ const selected=[...items.filter(item=>sel.has(item.id)).flatMap(item=>item.paths
+  .filter(file=>chosen.has(key(item.id,file))).map(file=>({kind:'cli',id:item.id,name:item.name,file})))];
+ for(const model of installedModels)if(selectedInstalledModels.has(model.id))selected.push({kind:'model',id:model.id,name:model.name||model.id});
+ return selected;
+};
+function merge(r){r.forEach(n=>{let o=items.find(i=>i.id===n.id);if(!o){items.push(n);o=n}else{n.paths.forEach(p=>!o.paths.includes(p)&&o.paths.push(p));for(const field of ['version','sizeBytes','helpText','installabilityRank','installabilityBasis','pathDetails'])if(n[field]!==undefined)o[field]=n[field]}if(sel.has(o.id))o.paths.forEach(p=>chosen.add(key(o.id,p)))});
+ items.sort((a,b)=>a.name.localeCompare(b.name));render()}
+function render(){
+ const selectedCount=items.filter(item=>sel.has(item.id)).length+selectedInstalledModels.size;
+ const L=items.filter(i=>!filter||i.name.toLowerCase().includes(filter)||i.id.includes(filter));
+ const installed=installedModels.filter(model=>!filter||`${model.name||''} ${model.id}`.toLowerCase().includes(filter))
+  .sort((a,b)=>Date.parse(b.installedAt||'')-Date.parse(a.installedAt||''));
+ const cliRows=L.map(item=>{const directories=new Set(item.paths.map(file=>file.replace(/[\\/][^\\/]*$/,''))),metadata=[item.version?`Versão: ${item.version}`:'Versão indisponível',item.sizeBytes?`Tamanho: ${(item.sizeBytes/1024/1024).toFixed(1)} MB`:'Tamanho indisponível',item.installabilityRank!==undefined?`Possibilidade de instalação: ${item.installabilityRank}/100`:''];return `<label class="it-card ${sel.has(item.id)?'on':''}" title="${esc(metadata.filter(Boolean).join(' · '))}"><span class="it-head"><input type="checkbox" value="${esc(item.id)}" ${sel.has(item.id)?'checked':''}><span class="n">${esc(item.name)}</span></span><small>${directories.size} ${directories.size===1?'pasta':'pastas'}${item.version?` · v${esc(item.version)}`:''}</small></label>`}).join('');
+ const installedRows=installed.map(model=>{const broken=model.usable===false;return `<label class="it-card installed-model ${selectedInstalledModels.has(model.id)?'on':''} ${model.id===activeInstalledModel?'active':''} ${broken?'broken':''}" title="${broken?`Incompleto: faltam ${model.missingBlobs} ficheiro(s). Volte a descarregar com ollama pull ${esc(model.id)}`:esc(model.id)}"><span class="it-head"><input type="checkbox" data-installed-model="${esc(model.id)}" ${selectedInstalledModels.has(model.id)?'checked':''}><span class="n" title="${esc(model.id)}">${esc(model.name||model.id)}</span></span><small title="${broken?'Modelo incompleto: faltam ficheiros no armazenamento do Ollama':'O armazenamento é gerido pelo Ollama'}">${broken?'Incompleto':'Ollama'}${model.sizeBytes?` · ${(model.sizeBytes/1024/1024/1024).toFixed(1)} GB`:''}</small></label>`}).join('');
+ const groups=[L.length?`<div class="list-group"><h3 class="list-group-title">Agentes</h3>${cliRows}</div>`:'',installed.length?`<div class="list-group"><h3 class="list-group-title">Modelos instalados</h3>${installedRows}</div>`:''].join('');
+ $('#list').innerHTML=groups||'<div class="empty">Nada encontrado</div>';
+ $('#list').classList.toggle('danger',!!targets().length);
+ $('#list').classList.toggle('chat',consoleVisible);
+ const S=items.filter(i=>sel.has(i.id));
+ $('#ttl').textContent=!S.length?'Modelos recomendados':S.length===1?S[0].name:S.length+' AI selecionadas';
+ if(activeInstalledModel)$('#ttl').textContent=installedModels.find(model=>model.id===activeInstalledModel)?.name||'Modelo instalado';
+ const modelLanding=dashboardStartup||!S.length||!!activeInstalledModel||!!activeSource;
+ const activeTab=currentConversation();
+ if(consoleVisible)$('#ttl').textContent=activeTab?`${activeTab.type==='model'?'Conversa':'Consola'} — ${activeTab.name}`:'Consola interativa';
+ if(helpVisible){const model=installedModels.find(item=>item.id===activeInstalledModel);$('#ttl').textContent=`Ajuda — ${model?.name||selectedCli()?.name||'CLIs'}`;}
+ $('#model-body').hidden=consoleVisible||helpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#cli-help-panel').hidden=!helpVisible;$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
+ activeChatModel=activeTab&&activeTab.type==='model'?activeTab.entityId:'';
+ selectedDirectory=activeTab&&activeTab.directory||'';
+ $('#terminal-panel').classList.toggle('chat-mode',!!activeChatModel);
+ $('#model-chat-composer').hidden=!activeChatModel;
+ $('#model-chat-note').hidden=!activeChatModel;
+ $('#model-chat-input').disabled=!!(activeTab&&activeTab.chatRequest);
+ $('#model-chat-send').disabled=!!(activeTab&&activeTab.chatRequest);
+ $('#terminal-shell-label').textContent=(activeTab&&activeTab.shell)||'PowerShell';
+ $('#terminal-directory-label').textContent=selectedDirectory||'Sem diretório selecionado';
+ $('#terminal-clear-directory').hidden=!selectedDirectory;
+ renderConversationTabs();
+ $('#terminal-new').dataset.tip=selectedCount?`Nova conversa com ${selectedCount} entidade(s) selecionada(s)`:'Nova conversa: selecione agentes ou modelos na lista';
+ $('#terminal-new').setAttribute('aria-label',selectedCount?`Nova conversa com ${selectedCount} entidade(s)`:'Nova conversa');
+ renderInstalledModelInfo();
+ $('#body').innerHTML=S.length?S.map(it=>`<div class="card"><h3>${esc(it.name)}</h3><p>${it.paths.length} localização(ões). Assinale as que pretende desinstalar.</p>${it.paths.map(p=>`<label class="pr ${chosen.has(key(it.id,p))?'on':''}"><input type="checkbox" data-id="${esc(it.id)}" data-p="${esc(p)}" ${chosen.has(key(it.id,p))?'checked':''}><span>${esc(p)}</span></label>`).join('')}</div>`).join(''):'<div class="empty">Selecione uma ou mais AI na lista</div>';
+ $('#un').hidden=false;$('#un').classList.toggle('off',!targets().length)}
+$('#list').onchange=e=>{
+ dashboardStartup=false;activeSource='';
+ const modelId=e.target.dataset.installedModel;
+ if(modelId){
+  if(e.target.checked){selectedInstalledModels.add(modelId);activeInstalledModel=modelId;helpTargetId=''}
+  else{selectedInstalledModels.delete(modelId);if(activeInstalledModel===modelId)activeInstalledModel=''}
+  render();if(helpVisible)showCliHelp();return;
+ }
+ const i=items.find(x=>x.id===e.target.value);if(!i)return;
+ activeInstalledModel='';
+ if(e.target.checked)pick(i);else{sel.delete(i.id);i.paths.forEach(p=>chosen.delete(key(i.id,p)))}
+ helpTargetId='';render();if(helpVisible)showCliHelp();
+};
+$('#body').onchange=e=>{const k=key(e.target.dataset.id,e.target.dataset.p);e.target.checked?chosen.add(k):chosen.delete(k);render()};
+async function scan(names=[],selectNew=false){st('A analisar localizações comuns…');busy(true);
+ try{
+  const known=new Set(items.flatMap(item=>item.paths.map(file=>key(item.id,file))));
+  const response=await api('/api/scan?names='+encodeURIComponent(names.join(','))),result=await response.json();
+  if(!response.ok||!Array.isArray(result))throw new Error(result.out||'O servidor não devolveu uma lista de CLIs válida.');
+  merge(result);
+  if(selectNew){const added=result.filter(item=>item.paths.some(file=>!known.has(key(item.id,file))));if(added.length){const item=items.find(candidate=>candidate.id===added[0].id);if(item){sel.clear();chosen.clear();selectedInstalledModels.clear();activeInstalledModel='';helpTargetId='';pick(item);render();if(helpVisible)showCliHelp()}}}
+  st(result.length?`${result.length} AI encontrada(s)`:'Nada encontrado nas localizações comuns');return result;
+ }catch(error){st(`Falha na análise do sistema: ${error.message}`);showToast('error',`Não foi possível analisar as instalações: ${error.message}`);throw error}
+ finally{busy(false)}
+}
+let reanalysisRunning=false;
+async function reanalyzeSystem(){
+ if(reanalysisRunning)return;
+ reanalysisRunning=true;const button=$('#rs');button.disabled=true;
+ try{
+  const results=await scan([],true);
+  showToast('success',`Análise concluída: ${results.length} CLI(s) detetado(s).`);
+ }catch{}finally{reanalysisRunning=false;button.disabled=false}
+}
+function deep(names=[]){if(es)es.close();busy(true);st('A pesquisar em profundidade…');
+ es=new EventSource('/api/deep?t='+TK+'&names='+encodeURIComponent(names.join(',')));
+ es.addEventListener('hit',e=>{merge([JSON.parse(e.data)])});
+ es.addEventListener('dir',e=>st('A pesquisar: '+JSON.parse(e.data)));
+ es.addEventListener('done',()=>{es.close();busy(false);st('Pesquisa concluída')});es.onerror=()=>{es.close();busy(false)}}
+const match=q=>items.find(i=>i.name.toLowerCase().includes(q)||i.id.includes(q));
+async function search(){const q=$('#q').value.trim();filter=q.toLowerCase();render();
+ if(!q)return;let i=match(filter);if(i){dashboardStartup=false;pick(i);render();return}
+ try{const r=await scan([q]),w=r.find(x=>x.id===q.toLowerCase()||x.name.toLowerCase().includes(filter));const f=w&&items.find(x=>x.id===w.id);if(f){dashboardStartup=false;pick(f);render()}else deep([q])}catch{}}
+$('#go').onclick=search;$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+$('#q').oninput=()=>{filter=$('#q').value.trim().toLowerCase();render()};
+$('#rs').onclick=event=>{event.preventDefault();reanalyzeSystem()};
+$('#dp').onclick=()=>deep($('#q').value.trim()?[$('#q').value.trim()]:[]);
+const dlg=(text,ask)=>new Promise(res=>{const d=$('#dlg');$('#dtx').textContent=text;$('#dno').style.display=ask?'':'none';d.classList.add('v');
+ const done=v=>{d.classList.remove('v');$('#dok').onclick=$('#dno').onclick=null;document.removeEventListener('keydown',kd);res(v);setTimeout(()=>$('#q').focus(),50)};
+ const kd=e=>{if(e.key==='Escape')done(false)};document.addEventListener('keydown',kd);
+ $('#dok').onclick=()=>done(true);$('#dno').onclick=()=>done(false);(ask?$('#dno'):$('#dok')).focus()});
+$('#un').onclick=async()=>{const T=targets();if(!T.length)return;
+ busy(true);st('A preparar…');let txt=`Desinstalar ${T.length} item(ns)?\n`;
+ for(const t of T){if(t.kind==='model'){txt+=`\n${t.name}\n  Remover o modelo do Ollama: ${t.id}\n`;continue}
+  try{const p=await (await api('/api/plan',{method:'POST',body:JSON.stringify({id:t.id,file:t.file})})).json();
+  txt+=`\n${t.name}\n  ${t.file}\n`+(p.root?(p.pathEntries.length?`  • Retirar do PATH: ${p.pathEntries.join(' ; ')}\n`:'  • PATH: sem entradas desta AI\n')+`  • Remover a pasta: ${p.root}\n`:'  • Pasta partilhada: não é apagada (só o pacote/comando)\n')}catch(e){txt+=`\n${t.name}\n  ${t.file}\n`}}
+ busy(false);st('Pronto');if(!await dlg(txt,true))return;
+ busy(true);let ok=0;const failures=[];
+ for(const t of T){st(`A desinstalar ${t.name}…`);
+  try{
+   const endpoint=t.kind==='model'?'/api/models/uninstall':'/api/uninstall';
+   const body=t.kind==='model'?{id:t.id}:{id:t.id,file:t.file};
+   const response=await api(endpoint,{method:'POST',body:JSON.stringify(body)}),r=await response.json();
+   if(r.ok){ok++;if(t.kind==='model')installedModels=installedModels.filter(model=>model.id!==t.id)}
+   else failures.push(`${t.name}: ${r.out||'Falha ao desinstalar.'}`)}catch(e){failures.push(`${t.name}: ${e.message}`)}}
+ busy(false);st(`${ok}/${T.length} item(ns) desinstalado(s)`);
+ selectedInstalledModels.clear();activeInstalledModel='';activeSearchId='';
+ if(failures.length){showToast(ok?'warning':'error',`${ok}/${T.length} item(ns) desinstalado(s). ${failures.slice(0,2).join(' · ')}`)}
+ else showToast('success',`${ok} item(ns) desinstalado(s) com sucesso.`);
+ try{await loadInstalledModels()}catch(error){showToast('error',`Não foi possível atualizar a lista de modelos: ${error.message}`)}
+ items=[];sel.clear();chosen.clear();render();scan()};
+/* controlos da janela */
+const W=window.winctl;
+$('#bmin').onclick=()=>W?W.ctl('min'):0;
+$('#bx').onclick=()=>W?W.ctl('close'):window.close();
+$('#bmax').onclick=()=>{if(W)W.ctl('max');else document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()};
+if(W)W.onState(m=>$('#bmax').innerHTML=ic(m?'res':'max'));
+let terminalResizeObserver=null,tabCarouselTimer=null,contextDragging=null,contextSuppressClick=false,tabWheelIndex=0;
+function currentConversation(){return conversationTabs.find(tab=>tab.id===activeConversationId)||null}
+function fitConsole(){
+ const tab=currentConversation();
+ if(!tab||!tab.terminal||!tab.fitAddon||!consoleVisible)return;
+ requestAnimationFrame(()=>{
+  const output=$(`#terminal-output [data-session-output="${tab.id}"]`);if(!output||!output.clientWidth||!output.clientHeight)return;
+  tab.fitAddon.fit();if(W&&tab.type!=='model'&&tab.started)W.resizeConsole(tab.id,tab.terminal.cols,tab.terminal.rows);
+ });
+}
+function ensureConversationHost(tab){
+ let host=$(`#terminal-output [data-session-output="${tab.id}"]`);
+ if(!host){host=document.createElement('div');host.className='terminal-session-output';host.dataset.sessionOutput=tab.id;host.hidden=tab.id!==activeConversationId;$('#terminal-output').append(host)}
+ return host;
+}
+function initializeTerminal(tab){
+ if(tab.terminal)return;
+ tab.terminal=new window.Terminal({cursorBlink:true,scrollback:10000,convertEol:true,fontSize:13,fontFamily:'Consolas, "Cascadia Mono", monospace',theme:{background:'#111720',foreground:'#d7e2ee',cursor:'#d7e2ee',selectionBackground:'#36527a',black:'#0c0c0c',red:'#c50f1f',green:'#13a10e',yellow:'#c19c00',blue:'#0037da',magenta:'#881798',cyan:'#3a96dd',white:'#cccccc',brightBlack:'#767676',brightRed:'#e74856',brightGreen:'#16c60c',brightYellow:'#f9f1a5',brightBlue:'#3b78ff',brightMagenta:'#b4009e',brightCyan:'#61d6d6',brightWhite:'#f2f2f2'}});
+  tab.fitAddon=new window.FitAddon.FitAddon();tab.terminal.loadAddon(tab.fitAddon);tab.terminal.open(ensureConversationHost(tab));
+  tab.terminal.onData(data=>{if(!W||tab.type==='model')return;if(tab.started)W.writeConsole(tab.id,data);else if(tab.starting)tab.pendingInput+=data});
+  if(!terminalResizeObserver){terminalResizeObserver=new ResizeObserver(fitConsole);terminalResizeObserver.observe($('#terminal-output'))}
+}
+function renderConversationTabs(){
+ const aiTabs=conversationTabs;
+ $('#terminal-tabs').innerHTML=aiTabs.map(tab=>`<button class="terminal-tab ${tab.id===activeConversationId?'active':''}" type="button" data-conversation-tab="${tab.id}" title="${esc(tab.name)}">${esc(tab.name)}</button>`).join('');
+ for(const tab of conversationTabs){const host=$(`#terminal-output [data-session-output="${tab.id}"]`);if(host)host.hidden=tab.id!==activeConversationId}
+ tabWheelIndex=Math.max(0,aiTabs.findIndex(tab=>tab.id===activeConversationId));
+
+}
+function activateConversation(id){
+ const tab=conversationTabs.find(item=>item.id===id);if(!tab)return;
+ const openingConsole=!consoleVisible;
+ activeConversationId=id;selectedDirectory=tab.directory||'';activeInstalledModel=tab.type==='model'?tab.entityId:'';
+ consoleVisible=true;helpVisible=false;activeChatModel=tab.type==='model'?tab.entityId:'';
+ render();initializeTerminal(tab);fitConsole();if(openingConsole)positionContextButtonAtConsoleCorner();
+ if(tab.type==='model')$('#model-chat-input').focus();else tab.terminal.focus();
+}
+$('#terminal-tabs').addEventListener('click',event=>{
+ const button=event.target.closest('[data-conversation-tab]');if(!button)return;
+ clearInterval(tabCarouselTimer);tabCarouselTimer=null;
+ activateConversation(button.dataset.conversationTab);
+ button.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+});
+$('#terminal-tab-carousel').addEventListener('mouseenter',()=>{
+ clearInterval(tabCarouselTimer);
+ tabCarouselTimer=setInterval(()=>{
+  const carousel=$('#terminal-tab-carousel'),max=carousel.scrollWidth-carousel.clientWidth;
+  if(max>0){carousel.scrollLeft+=1.25;if(carousel.scrollLeft>=max)carousel.scrollLeft=0}
+ },30);
+});
+$('#terminal-tab-carousel').addEventListener('mouseleave',()=>{clearInterval(tabCarouselTimer);tabCarouselTimer=null});
+$('#terminal-tab-carousel').addEventListener('wheel',event=>{
+ const tabs=[...document.querySelectorAll('#terminal-tabs [data-conversation-tab]')];if(tabs.length<2)return;
+ event.preventDefault();event.stopPropagation();
+ clearInterval(tabCarouselTimer);tabCarouselTimer=null;
+ const direction=Math.sign(event.deltaY||event.deltaX);
+ tabWheelIndex=Math.max(0,Math.min(tabs.length-1,tabWheelIndex+direction));
+ const target=tabs[tabWheelIndex];
+ if(target){activateConversation(target.dataset.conversationTab);target.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}
+},{passive:false});
+if(W){
+ W.onConsoleOutput(data=>{const tab=conversationTabs.find(item=>item.id===data.sessionId);if(tab&&tab.terminal)tab.terminal.write(data.text)});
+ W.onConsoleStarted(data=>{
+  const tab=conversationTabs.find(item=>item.id===data.sessionId);if(!tab)return;
+  tab.started=true;tab.starting=false;tab.shell=data.shell;
+  if(tab.id===activeConversationId){consoleShellLabel=data.shell;fitConsole()}
+  if(tab.pendingDirectoryChange&&tab.directory){W.writeConsole(tab.id,`${shellChangeDirectory(tab.directory,data.shell)}\r`);tab.pendingDirectoryChange=false}
+  if(tab.pendingAction){const action=tab.pendingAction;tab.pendingAction=null;action(data.shell)}
+  if(tab.pendingInput){W.writeConsole(tab.id,tab.pendingInput);tab.pendingInput=''}
+  requestAnimationFrame(()=>{if(tab.id===activeConversationId&&tab.terminal)tab.terminal.focus()});
+ });
+ W.onConsoleError(data=>{
+  const tab=conversationTabs.find(item=>item.id===data.sessionId);if(!tab)return;
+  tab.started=false;tab.starting=false;tab.pendingAction=null;
+  if(tab.terminal)tab.terminal.writeln(`\r\nErro ao iniciar a consola: ${terminalText(data.message)}`);
+  showToast('error',`Não foi possível iniciar a consola: ${data.message}`);
+ });
+ W.onConsoleExit(details=>{
+  const tab=conversationTabs.find(item=>item.id===details.sessionId);if(!tab)return;
+  tab.started=false;tab.starting=false;tab.pendingAction=null;
+  if(tab.terminal)tab.terminal.writeln(`\r\nConsola terminada (código ${details.code===null?'indisponível':details.code}${details.signal?`, sinal ${details.signal}`:''}).`);
+ });
+}
+function createConversationTab(type,entityId,name,commandForShell=null){
+ let tab=conversationTabs.find(item=>item.type===type&&item.entityId===entityId);
+ if(tab){
+  activateConversation(tab.id);
+  if(type!=='model'&&!tab.started&&!tab.starting&&W){if(commandForShell)tab.pendingAction=shell=>W.writeConsole(tab.id,`${commandForShell(shell)}\r`);tab.pendingDirectoryChange=!!tab.directory;tab.starting=true;W.startConsole(tab.id,tab.directory||undefined)}
+  return tab;
+ }
+ const openingConsole=!consoleVisible;
+ tab={id:`tab-${Date.now()}-${++conversationCounter}`,type,entityId,name,directory:selectedDirectory||'',terminal:null,fitAddon:null,started:false,starting:false,pendingInput:'',pendingAction:null,pendingDirectoryChange:type==='agent'&&!!selectedDirectory,chatHistory:[],attachments:[],chatRequest:null,initialized:false};
+ conversationTabs.push(tab);activeConversationId=tab.id;activeInstalledModel=type==='model'?entityId:'';activeChatModel=type==='model'?entityId:'';consoleVisible=true;helpVisible=false;render();initializeTerminal(tab);
+ if(openingConsole)positionContextButtonAtConsoleCorner();
+ if(type==='model'){
+  tab.terminal.writeln(`[Conversa local com ${terminalText(name)} · Ollama]`);
+  tab.terminal.writeln(tab.directory?`[Contexto de ficheiros selecionado: ${terminalText(tab.directory)}]`:'[Sem diretório de ficheiros selecionado.]');
+  tab.initialized=true;fitConsole();requestAnimationFrame(()=>$('#model-chat-input').focus());
+ }else if(W){
+  if(commandForShell)tab.pendingAction=shell=>W.writeConsole(tab.id,`${commandForShell(shell)}\r`);
+  tab.starting=true;W.startConsole(tab.id,tab.directory||undefined);
+  fitConsole();requestAnimationFrame(()=>tab.terminal.focus());
+ }else{
+  tab.terminal.writeln('A consola está disponível apenas na aplicação de ambiente de trabalho.');
+  showToast('error','A consola interativa só está disponível na aplicação de ambiente de trabalho.');
+ }
+ return tab;
+}
+function startConsoleWithCommand(command=''){
+ const tab=createConversationTab('system',`system-${++conversationCounter}`,'Consola');
+ if(command){if(tab.started)W.writeConsole(tab.id,command);else tab.pendingInput+=command}
+}
+function shellChangeDirectory(directory,shell){
+ if(/powershell/i.test(shell))return `Set-Location -LiteralPath '${directory.replace(/'/g,"''")}'`;
+ if(/^cmd/i.test(shell))return `cd /d "${directory.replace(/"/g,'""')}"`;
+ return `cd '${directory.replace(/'/g,`'\\''`)}'`;
+}
+function shellHomeCommand(shell){
+ if(/powershell/i.test(shell))return 'Set-Location -LiteralPath $HOME';
+ if(/^cmd/i.test(shell))return 'cd /d "%USERPROFILE%"';
+ return 'cd "$HOME"';
+}
+function positionContextButtonAtConsoleCorner(){
+ requestAnimationFrame(()=>{
+  const panel=$('#terminal-panel'),output=$('.terminal-output'),button=$('#terminal-context-toggle'),root=$('.terminal-context');
+  if(panel.hidden)return;
+  const panelRect=panel.getBoundingClientRect(),outputRect=output.getBoundingClientRect(),bounds=panel.parentElement.getBoundingClientRect();
+  const width=button.offsetWidth||38,height=button.offsetHeight||38;
+  const left=Math.max(bounds.left,Math.min(bounds.right-width,panelRect.left+12));
+  const top=Math.max(bounds.top,Math.min(bounds.bottom-height,outputRect.bottom-height-12));
+  root.style.left=`${left}px`;root.style.top=`${top}px`;root.style.bottom='auto';
+ });
+}
+function terminalText(text){return String(text||'').replace(/\u001b\[[0-?]*[ -/]*[@-~]/g,'').replace(/\r\n?/g,'\n').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,'')}
+function launchInstalledModel(model){
+ if(model.usable===false){showToast('error',`${model.name||model.id} está incompleto: faltam ${model.missingBlobs} ficheiro(s). Volte a descarregar com ollama pull ${model.id}.`);return null}
+ return createConversationTab('model',model.id,model.name||model.id);
+}
+function launchAgent(item){return createConversationTab('agent',item.id,item.name,shell=>cliCommand(item,'',shell))}
+function hideContextMenu(){
+ $('#terminal-context-menu').hidden=true;
+ $('#terminal-context-toggle').setAttribute('aria-expanded','false');
+}
+$('#terminal-context-toggle').onclick=()=>{
+ if(contextSuppressClick){contextSuppressClick=false;return}
+ const menu=$('#terminal-context-menu'),open=menu.hidden;
+ menu.hidden=!open;$('#terminal-context-toggle').setAttribute('aria-expanded',String(open));
+};
+function endContextDrag(){
+ if(!contextDragging)return;
+ contextDragging=null;$('#terminal-context-toggle').classList.remove('dragging');
+ contextSuppressClick=true;
+ const menu=$('#terminal-context-menu');menu.hidden=false;$('#terminal-context-toggle').setAttribute('aria-expanded','true');
+}
+$('#terminal-context-toggle').addEventListener('pointerdown',event=>{
+ if(!event.ctrlKey||event.button!==0)return;
+ event.preventDefault(); const root=$('.terminal-context'),button=$('#terminal-context-toggle'),buttonRect=button.getBoundingClientRect();
+ root.style.left=`${buttonRect.left}px`;root.style.top=`${buttonRect.top}px`;root.style.bottom='auto';
+ contextDragging={pointerId:event.pointerId,offsetX:event.clientX-buttonRect.left,offsetY:event.clientY-buttonRect.top};
+ button.classList.add('dragging');button.setPointerCapture(event.pointerId);
+});
+$('#terminal-context-toggle').addEventListener('pointermove',event=>{
+ if(!contextDragging||event.pointerId!==contextDragging.pointerId)return;
+ const root=$('.terminal-context'),panel=$('#terminal-panel'),button=$('#terminal-context-toggle'),rect=panel.getBoundingClientRect(),width=button.offsetWidth,height=button.offsetHeight;
+ const minX=Math.max(0,rect.left-width),maxX=Math.min(window.innerWidth-width,rect.right);
+ const minY=Math.max(0,rect.top-height),maxY=Math.min(window.innerHeight-height,rect.bottom);
+ const left=Math.max(minX,Math.min(maxX,event.clientX-contextDragging.offsetX));
+ const top=Math.max(minY,Math.min(maxY,event.clientY-contextDragging.offsetY));
+ root.style.left=`${left}px`;root.style.top=`${top}px`;
+});
+$('#terminal-context-toggle').addEventListener('pointerup',event=>{if(contextDragging&&event.pointerId===contextDragging.pointerId)endContextDrag()});
+$('#terminal-context-toggle').addEventListener('pointercancel',endContextDrag);
+window.addEventListener('keyup',event=>{if(event.key==='Control'&&contextDragging)endContextDrag()});
+async function chooseContextDirectory(){
+ const tab=currentConversation();if(!tab||!W){showToast('error','A escolha de diretório está disponível apenas numa conversa de ambiente de trabalho.');return}
+ try{
+  const directory=await W.selectDirectory();if(!directory)return;
+  tab.directory=directory;selectedDirectory=directory;hideContextMenu();
+  $('#terminal-directory-label').textContent=directory;$('#terminal-clear-directory').hidden=false;
+  if(tab.type==='model'){
+   tab.terminal.writeln(`\r\n[Diretório de contexto para as próximas mensagens: ${terminalText(directory)}]`);
+   modelStatus('Diretório selecionado; os ficheiros compatíveis serão incluídos no contexto do modelo.');
+  }else if(tab.started)W.writeConsole(tab.id,`${shellChangeDirectory(directory,tab.shell||consoleShellLabel)}\r`);
+  else tab.pendingDirectoryChange=true;
+ }catch(error){showToast('error',`Não foi possível escolher o diretório: ${error.message}`)}
+}
+$('#terminal-choose-directory').onclick=chooseContextDirectory;
+$('#terminal-clear-directory').onclick=()=>{
+ const tab=currentConversation();if(!tab)return;
+ const previous=tab.directory;tab.directory='';selectedDirectory='';hideContextMenu();
+ $('#terminal-directory-label').textContent='Sem diretório selecionado';$('#terminal-clear-directory').hidden=true;
+ if(tab.type==='model')tab.terminal.writeln('\r\n[Contexto de ficheiros removido.]');
+ else if(tab.started)W.writeConsole(tab.id,shellHomeCommand(tab.shell||consoleShellLabel)+'\r');
+ else tab.pendingDirectoryChange=false;
+ if(previous)modelStatus('Diretório de contexto removido.');
+ renderConversationTabs();
+};
+async function chooseConversationMedia(kind){
+ const tab=currentConversation();if(!tab||!W)return;
+ try{
+  if(tab.type==='agent'){
+   const staged=tab.attachments.filter(file=>file&&file.path).map(file=>file.path);
+   const paths=staged.length?staged:(W.clipboardFiles?await W.clipboardFiles():[]);
+   if(!paths.length){showToast('info','Copie ficheiros no Explorador do Windows: os agentes recebem os caminhos colados na consola, sem diálogo.');return}
+   const shell=tab.shell||consoleShellLabel;
+   const quoted=paths.map(file=>/powershell/i.test(shell)?`'${file.replace(/'/g,"''")}'`:`"${file.replace(/"/g,'""')}"`).join(' ');
+   if(tab.started)tab.terminal.paste(quoted);
+   else tab.pendingInput+=quoted;
+   tab.terminal.focus();hideContextMenu();
+   modelStatus(`${paths.length} caminho(s) colado(s) na consola sem executar.`);
+   return;
+  }
+  const files=await W.selectMedia(kind,true);if(!files.length)return;
+  tab.attachments.push(...files);
+  tab.terminal.writeln(`\r\n[${files.length} anexo(s) preparado(s) para a próxima mensagem.]`);
+  $('#model-chat-input').focus();modelStatus(`${files.length} anexo(s) preparado(s) para enviar ao modelo.`);
+  hideContextMenu();
+ }catch(error){showToast('error',`Não foi possível anexar o conteúdo: ${error.message}`)}
+}
+$('#terminal-choose-image').onclick=()=>chooseConversationMedia('image');
+$('#terminal-choose-files').onclick=()=>chooseConversationMedia('files');
+$('#model-chat-composer').addEventListener('submit',async event=>{
+ event.preventDefault();
+ const tab=currentConversation(),prompt=$('#model-chat-input').value.trim(),model=installedModels.find(item=>item.id===activeChatModel);
+ if(!tab||tab.type!=='model'||!model||!prompt||tab.chatRequest)return;
+ const controller=new AbortController();tab.chatRequest=controller;
+ const send=$('#model-chat-send'),input=$('#model-chat-input');
+ send.disabled=true;input.disabled=true;
+ const attachmentsForMessage=tab.attachments.slice();
+ const fileContext=attachmentsForMessage.filter(file=>typeof file.text==='string').map(file=>`\n\n--- Anexo: ${file.name} ---\n${file.text}`).join('');
+ const imageAttachments=attachmentsForMessage.filter(file=>typeof file.image==='string');
+ const userMessage={role:'user',content:prompt+fileContext};
+ if(imageAttachments.length)userMessage.images=imageAttachments.map(file=>file.image);
+ tab.terminal.write(`\r\n${terminalText(model.name||model.id)}> ${terminalText(prompt)}${fileContext?`\n[${attachmentsForMessage.filter(file=>file.text).length} ficheiro(s) anexado(s)]`:''}${imageAttachments.length?`\n[${imageAttachments.length} imagem(ns) anexada(s)]`:''}\r\n`);
+ input.value='';
+ try{
+  const messages=[...tab.chatHistory,userMessage];
+  while(messages.length>20||messages.reduce((total,message)=>total+message.content.length,0)>600000){if(messages.length<=1)break;messages.splice(0,2)}
+  const response=await api('/api/models/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({model:model.id,messages,directory:tab.directory||''}),signal:controller.signal});
+  if(!response.ok){const error=await response.json();throw new Error(error.out||'Falha ao enviar mensagem ao modelo.')}
+  if(!response.body)throw new Error('O servidor não devolveu a resposta do modelo.');
+  const reader=response.body.getReader(),decoder=new TextDecoder();let pending='',received=false,answer='';
+  for(;;){
+   const {value,done}=await reader.read();if(done)break;
+   pending+=decoder.decode(value,{stream:true});
+   const lines=pending.split(/\r?\n/);pending=lines.pop();
+   for(const line of lines){if(!line.trim())continue;const part=JSON.parse(line);if(part.error)throw new Error(part.error);const text=part.message&&part.message.content;if(text){tab.terminal.write(terminalText(text));answer+=text;received=true}}
+  }
+  pending+=decoder.decode();
+  if(pending.trim()){const part=JSON.parse(pending);if(part.error)throw new Error(part.error);const text=part.message&&part.message.content;if(text){tab.terminal.write(terminalText(text));answer+=text;received=true}}
+  if(!received)throw new Error('O modelo terminou sem devolver texto.');
+  tab.chatHistory=messages.slice(-18).concat({role:'assistant',content:answer});
+  tab.attachments=tab.attachments.filter(file=>!attachmentsForMessage.includes(file));tab.terminal.write('\r\n\r\n');modelStatus(`Resposta recebida de ${model.name||model.id}.`);
+ }catch(error){
+  if(error.name!=='AbortError'){tab.terminal.writeln(`\r\n[Erro: ${terminalText(error.message)}]`);modelStatus(`Falha na conversa: ${error.message}`);showToast('error',`Falha na conversa com o modelo: ${error.message}`)}
+ }finally{
+  if(tab.chatRequest===controller){tab.chatRequest=null;if(tab.id===activeConversationId){render();input.focus()}}
+ }
+});
+$('#model-chat-input').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();$('#model-chat-composer').requestSubmit()}});
+function selectedEntities(){
+ const agents=items.filter(item=>sel.has(item.id));
+ const models=installedModels.filter(item=>selectedInstalledModels.has(item.id));
+ return {agents,models};
+}
+function launchSelection(){
+ const {agents,models}=selectedEntities();
+ if(!agents.length&&!models.length){startConsoleWithCommand('');return null}
+ const created=[];
+ for(const agent of agents)created.push(launchAgent(agent));
+ for(const model of models)created.push(launchInstalledModel(model));
+ const first=created.find(tab=>tab&&tab.id);
+ if(first)activateConversation(first.id);
+ return first||null;
+}
+$('#launch').onclick=()=>{
+ if(consoleVisible){consoleVisible=false;render();return}
+ launchSelection();
+};
+$('#terminal-new').onclick=()=>{
+ const {agents,models}=selectedEntities();
+ if(!agents.length&&!models.length){showToast('info','Selecione um ou mais agentes/modelos para iniciar as conversas.');return}
+ launchSelection();
+};
+$('#terminal-close').onclick=()=>{consoleVisible=false;render()};
+
+/* tooltips com seta e posicionamento inteligente */
+const tip=$('#tip'),ts=tip.querySelector('span'),ta=tip.querySelector('i');
+function showTip(el){ts.textContent=el.dataset.tip;tip.style.left='0';tip.style.top='0';tip.classList.add('v');
+ const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight,g=10,vw=innerWidth,vh=innerHeight;
+ let pos=el.dataset.pos||'bottom';if(pos.startsWith('bottom')&&r.bottom+g+h>vh)pos='top';if(pos==='top'&&r.top-g-h<0)pos='bottom';
+ let x=Math.min(Math.max(r.left+r.width/2-w/2,6),vw-w-6),y=pos==='top'?r.top-h-g:r.bottom+g;
+ tip.style.left=x+'px';tip.style.top=y+'px';
+ const ax=Math.min(Math.max(r.left+r.width/2-x-5,10),w-20);
+ ta.style.left=ax+'px';ta.style.top=pos==='top'?'auto':'-4px';ta.style.bottom=pos==='top'?'-4px':'auto'}
+document.addEventListener('mouseover',e=>{const el=e.target.closest('[data-tip]');el?showTip(el):tip.classList.remove('v')});
+document.addEventListener('click',()=>tip.classList.remove('v'));
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('/sw.js').catch(()=>{});
+$('.srch').addEventListener('mousedown',e=>{if(e.target.id==='q')return;setTimeout(()=>$('#q').focus(),0)});$('#q').addEventListener('mousedown',()=>window.focus());
+/* settings portáteis (guardados em data/settings.json junto ao app) */
+const save=()=>{if(!settingsLoaded)return Promise.resolve();return api('/api/settings',{method:'POST',body:JSON.stringify({query:$('#q').value})}).then(async response=>{if(!response.ok){const result=await response.json();throw new Error(result.out||'Falha ao guardar as seleções.')}}).catch(error=>{showToast('warning',`Não foi possível guardar a seleção: ${error.message}`)})};
+const _r=render;render=function(){_r();clearTimeout(render.t);render.t=setTimeout(save,400)};
+api('/api/settings').then(async response=>{const s=await response.json();if(!response.ok)throw new Error(s.out||'Falha ao carregar as seleções guardadas.');
+ if(s.query&&!$('#q').value){$('#q').value=s.query;filter=s.query.toLowerCase()}
+ settingsLoaded=true;render()
+}).catch(error=>{settingsLoaded=true;render();showToast('warning',`Não foi possível restaurar as seleções: ${error.message}`)});
+render();bootManager();
+</script></body></html>
