@@ -1,12 +1,13 @@
 {
   "name": "hangar",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "Hangar - AI Cockpit: gestor local de agentes e modelos de IA (CLI) com consola integrada",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "web": "node server.js",
-    "dist": "electron-builder --win"
+    "dist": "electron-builder --win",
+    "appx": "node tools/build-appx.js"
   },
   "devDependencies": {
     "electron": "^45.3.0",
