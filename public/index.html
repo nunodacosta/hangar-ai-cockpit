@@ -66,7 +66,8 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
 #model-body>.panel-close{position:fixed;top:64px;right:calc(var(--rp,300px) + 16px)}
 .app-help-panel{padding-right:64px}
 .body.is-empty{display:grid;place-items:center;overflow:hidden}
-.watermark{width:min(52%,420px);height:auto;opacity:.07;pointer-events:none;user-select:none}
+.body.is-empty>*:not(.watermark):not(.panel-close){display:none}
+.watermark{width:min(74%,620px);height:auto;opacity:.08;pointer-events:none;user-select:none}
 .console-resizer{flex:none;height:9px;cursor:ns-resize;display:flex;align-items:center;justify-content:center;background:transparent;touch-action:none}
 .console-resizer::before{content:"";width:64px;height:3px;border-radius:2px;background:var(--bd)}
 .console-resizer:hover::before,.console-resizer.drag::before{background:var(--ac)}
@@ -86,7 +87,10 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
 .terminal-meta-new:hover{color:#e3ebf5}
 .terminal-tab-carousel::-webkit-scrollbar{display:none}
 .terminal-tabs{height:100%;width:max-content;max-width:none;display:flex;align-items:flex-end;gap:2px;will-change:transform}
-.terminal-tab{max-width:190px;height:32px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 11px;border:1px solid #29313e;border-bottom:0;border-radius:9px 9px 0 0;background:#0d131d;color:#aab8ca;box-shadow:0 1px 0 #0d131d}
+.terminal-tab{max-width:190px;height:32px;flex:none;display:inline-flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap;padding:0 6px 0 11px;border:1px solid #29313e;border-bottom:0;border-radius:9px 9px 0 0;background:#0d131d;color:#aab8ca;box-shadow:0 1px 0 #0d131d}
+.terminal-tab-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab-close{width:16px;height:16px;flex:none;display:grid;place-items:center;border-radius:4px;color:#7d8b9e;font:11px/1 system-ui,sans-serif}
+.tab-close:hover{background:#2a3442;color:#e3ebf5}
 .terminal-tab:hover{color:#e3ebf5;background:#18212d;box-shadow:0 1px 0 #18212d}
 .terminal-tab.active{border-color:#52627a;background:#111720;color:#e3ebf5;box-shadow:0 1px 0 #111720}
 .terminal-meta-close{position:relative;z-index:2;flex:none;margin-left:auto;background:#111720}
@@ -313,7 +317,7 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
   </div>
   <div class="body" id="body" hidden></div>
   <div class="console-resizer" id="console-resizer" role="separator" aria-orientation="horizontal" aria-label="Redimensionar a altura da consola" data-tip="Arraste para redimensionar a altura da consola" data-pos="top" hidden></div>
-  <div class="cli-help-panel" id="cli-help-panel" hidden></div>
+  <div class="cli-help-panel" id="cli-help-panel" hidden><button class="ib panel-close" id="cli-help-close" data-tip="Fechar a ajuda e voltar ao painel" data-pos="bottom-left" aria-label="Fechar ajuda" hidden></button></div>
   <div class="cli-help-panel app-help-panel" id="app-help-panel" hidden><button class="ib panel-close" id="app-help-close" data-tip="Fechar a ajuda e voltar ao painel" data-pos="bottom-left" aria-label="Fechar ajuda" hidden></button></div>
   <div class="terminal-panel" id="terminal-panel" hidden>
    <div class="terminal-meta"><span class="terminal-shell-label" id="terminal-shell-label">PowerShell</span><div class="terminal-tab-carousel" id="terminal-tab-carousel"><div class="terminal-tabs" id="terminal-tabs"></div></div><button class="ib terminal-meta-new" id="terminal-new" data-tip="Nova conversa com as entidades selecionadas" data-pos="bottom" aria-label="Nova conversa"></button><button class="ib terminal-meta-close" id="terminal-close" data-tip="Ocultar a consola e voltar ao painel, mantendo as sessões ativas" data-pos="bottom-left" aria-label="Fechar consola"></button></div>
@@ -368,11 +372,11 @@ const $=s=>document.querySelector(s);
 const TK=document.querySelector('meta[name=t]').content;
 const api=(u,o={})=>fetch(u,{...o,headers:{'x-token':TK,...(o.headers||{})}});
 (()=>{const b=document.querySelector('.tb .brand b'),s=document.querySelector('.tb .tb-sub');if(!b||!s)return;const t=b.getBoundingClientRect().width;s.style.letterSpacing='0px';const w=s.getBoundingClientRect().width,n=s.textContent.length;s.style.letterSpacing=Math.max(0,(t-w)/n)+'px';})();
-$('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').setAttribute('aria-label','Reanalisar instalações do sistema');$('#dp').innerHTML=ic('radar');$('#cli-help').innerHTML=ic('cliHelp');$('#app-help').innerHTML=ic('info');$('#launch').innerHTML=ic('launch');$('#terminal-new').innerHTML=ic('plus');$('#terminal-close').innerHTML=ic('x');$('#un').innerHTML=ic('trash');$('#model-close').innerHTML=ic('x');$('#app-help-close').innerHTML=ic('x');
+$('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').setAttribute('aria-label','Reanalisar instalações do sistema');$('#dp').innerHTML=ic('radar');$('#cli-help').innerHTML=ic('cliHelp');$('#app-help').innerHTML=ic('info');$('#launch').innerHTML=ic('launch');$('#terminal-new').innerHTML=ic('plus');$('#terminal-close').innerHTML=ic('x');$('#un').innerHTML=ic('trash');$('#model-close').innerHTML=ic('x');$('#app-help-close').innerHTML=ic('x');$('#cli-help-close').innerHTML=ic('x');
 $('#dok').innerHTML=ic('ok');$('#dno').innerHTML=ic('x');$('#bmin').innerHTML=ic('min');$('#bmax').innerHTML=ic('max');$('#bx').innerHTML=ic('x');
 $('#refresh-models').innerHTML=ic('catalog');$('#model-search-go').innerHTML=ic('search');
 $('#add-source-submit').innerHTML=ic('linkAdd');
-let items=[],sel=new Set(),chosen=new Set(),es=null,filter='',installedModels=[],incompleteModels=[],selectedInstalledModels=new Set(),installedModelsLoaded=false,settingsLoaded=false,activeInstalledModel='',onlineSearchController=null,savedSearches=[],activeSearchId='',consoleVisible=false,helpVisible=false,appHelpVisible=false,helpRequest=null,helpRequestId=0,helpTargetId='',activeChatModel='',selectedDirectory='',consoleShellLabel='PowerShell',conversationTabs=[],activeConversationId='',conversationCounter=0,dashboardStartup=true;
+let items=[],sel=new Set(),chosen=new Set(),es=null,filter='',installedModels=[],incompleteModels=[],selectedInstalledModels=new Set(),installedModelsLoaded=false,settingsLoaded=false,activeInstalledModel='',onlineSearchController=null,savedSearches=[],activeSearchId='',consoleVisible=false,helpVisible=false,appHelpVisible=false,helpRequest=null,helpRequestId=0,helpTargetId='',activeChatModel='',selectedDirectory='',consoleShellLabel='PowerShell',conversationTabs=[],activeConversationId='',conversationCounter=0,dashboardStartup=true,landingVisible=true;
 const key=(id,p)=>id+'|'+p;
 const st=t=>$('#st').textContent=t, busy=b=>$('#bar').style.display=b?'block':'none';
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1035,7 +1039,7 @@ function render(){
  const activeTab=currentConversation();
  if(consoleVisible)$('#ttl').textContent=activeTab?`${activeTab.type==='model'?'Conversa':'Consola'} — ${activeTab.name}`:'Consola interativa';
  if(helpVisible){const model=installedModels.find(item=>item.id===activeInstalledModel);$('#ttl').textContent=`Ajuda — ${model?.name||selectedCli()?.name||'CLIs'}`;}
- $('#model-body').hidden=consoleVisible||helpVisible||appHelpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||appHelpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#console-resizer').hidden=!consoleVisible;const modelEmpty=!consoleVisible&&!helpVisible&&!appHelpVisible&&modelLanding&&!S.length&&!activeInstalledModel&&!activeSource;$('#model-close').hidden=!modelLanding||modelEmpty;$('#model-watermark').hidden=!modelEmpty;$('#model-body').classList.toggle('is-empty',modelEmpty);$('#app-help-close').hidden=!appHelpVisible;$('#cli-help-panel').hidden=!helpVisible;$('#app-help-panel').hidden=!appHelpVisible;$('#app-help').classList.toggle('on',appHelpVisible);$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
+ $('#model-body').hidden=consoleVisible||helpVisible||appHelpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||appHelpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#console-resizer').hidden=!consoleVisible;const modelEmpty=!consoleVisible&&!helpVisible&&!appHelpVisible&&!landingVisible;$('#model-close').hidden=!modelLanding||modelEmpty;$('#model-watermark').hidden=!modelEmpty;$('#model-body').classList.toggle('is-empty',modelEmpty);$('#app-help-close').hidden=!appHelpVisible;$('#cli-help-close').hidden=!helpVisible;$('#cli-help-panel').hidden=!helpVisible;$('#app-help-panel').hidden=!appHelpVisible;$('#app-help').classList.toggle('on',appHelpVisible);$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
  activeChatModel=activeTab&&activeTab.type==='model'?activeTab.entityId:'';
  selectedDirectory=activeTab&&activeTab.directory||'';
  $('#terminal-panel').classList.toggle('chat-mode',!!activeChatModel);
@@ -1154,10 +1158,20 @@ function initializeTerminal(tab){
 }
 function renderConversationTabs(){
  const aiTabs=conversationTabs;
- $('#terminal-tabs').innerHTML=aiTabs.map(tab=>`<button class="terminal-tab ${tab.id===activeConversationId?'active':''}" type="button" data-conversation-tab="${tab.id}" title="${esc(tab.name)}">${esc(tab.name)}</button>`).join('');
+ $('#terminal-tabs').innerHTML=aiTabs.map(tab=>`<button class="terminal-tab ${tab.id===activeConversationId?'active':''}" type="button" data-conversation-tab="${tab.id}" title="${esc(tab.name)}"><span class="terminal-tab-label">${esc(tab.name)}</span>${tab.type==='system'?'':`<span class="tab-close" role="button" tabindex="-1" data-tab-close="${tab.id}" title="Fechar ${esc(tab.name)}" aria-label="Fechar ${esc(tab.name)}">✕</span>`}</button>`).join('');
  for(const tab of conversationTabs){const host=$(`#terminal-output [data-session-output="${tab.id}"]`);if(host)host.hidden=tab.id!==activeConversationId}
  tabWheelIndex=Math.max(0,aiTabs.findIndex(tab=>tab.id===activeConversationId));
 
+}
+function closeConversationTab(id){
+ const index=conversationTabs.findIndex(tab=>tab.id===id);if(index<0)return;
+ const tab=conversationTabs[index];if(tab.type==='system')return;
+ try{if(W&&tab.started)W.stopConsole(tab.id)}catch{}
+ const host=$(`#terminal-output [data-session-output="${tab.id}"]`);if(host)host.remove();
+ conversationTabs.splice(index,1);
+ if(!conversationTabs.length){activeConversationId='';consoleVisible=false;activeChatModel='';activeInstalledModel='';render();return}
+ if(activeConversationId===id){const next=conversationTabs[Math.min(index,conversationTabs.length-1)];activeConversationId=next.id;activeChatModel=next.type==='model'?next.entityId:'';activeInstalledModel=next.type==='model'?next.entityId:''}
+ render();fitConsole();
 }
 function activateConversation(id){
  const tab=conversationTabs.find(item=>item.id===id);if(!tab)return;
@@ -1168,6 +1182,8 @@ function activateConversation(id){
  if(tab.type==='model')$('#model-chat-input').focus();else tab.terminal.focus();
 }
 $('#terminal-tabs').addEventListener('click',event=>{
+ const closeButton=event.target.closest('[data-tab-close]');
+ if(closeButton){event.stopPropagation();event.preventDefault();closeConversationTab(closeButton.dataset.tabClose);return}
  const button=event.target.closest('[data-conversation-tab]');if(!button)return;
  clearInterval(tabCarouselTimer);tabCarouselTimer=null;
  activateConversation(button.dataset.conversationTab);
@@ -1414,9 +1430,10 @@ $('#terminal-new').onclick=()=>{
  if(!agents.length&&!models.length){showToast('info','Selecione um ou mais agentes/modelos para iniciar as conversas.');return}
  launchSelection();
 };
-$('#terminal-close').onclick=()=>{consoleVisible=false;render()};
-$('#model-close').onclick=()=>{activeInstalledModel='';activeChatModel='';activeSource='';dashboardStartup=false;render()};
-$('#app-help-close').onclick=()=>{appHelpVisible=false;render()};
+$('#terminal-close').onclick=()=>{consoleVisible=false;landingVisible=true;render()};
+$('#model-close').onclick=()=>{landingVisible=false;render()};
+$('#app-help-close').onclick=()=>{appHelpVisible=false;landingVisible=true;render()};
+$('#cli-help-close').onclick=()=>{helpVisible=false;landingVisible=true;render()};
 (()=>{const rz=$('#console-resizer'),tp=$('#terminal-panel');let drag=false,startY=0,startH=0;const apply=h=>{const max=Math.max(180,window.innerHeight-220);const v=Math.max(140,Math.min(max,h));tp.style.height=v+'px';tp.style.flex='none';};rz.addEventListener('pointerdown',e=>{drag=true;startY=e.clientY;startH=tp.getBoundingClientRect().height;rz.classList.add('drag');rz.setPointerCapture(e.pointerId);e.preventDefault();});rz.addEventListener('pointermove',e=>{if(!drag)return;apply(startH+(startY-e.clientY));});const end=e=>{if(!drag)return;drag=false;rz.classList.remove('drag');try{rz.releasePointerCapture(e.pointerId)}catch{};if(typeof fitConsole==='function')fitConsole();};rz.addEventListener('pointerup',end);rz.addEventListener('pointercancel',end);rz.addEventListener('dblclick',()=>{tp.style.height='';tp.style.flex='';if(typeof fitConsole==='function')fitConsole();});})();
 
 /* tooltips com seta e posicionamento inteligente */
