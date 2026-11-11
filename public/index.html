@@ -67,7 +67,7 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
 .app-help-panel{padding-right:64px}
 .body.is-empty{display:grid;place-items:center;overflow:hidden}
 .body.is-empty>*:not(.watermark):not(.panel-close){display:none}
-.watermark{width:min(74%,620px);height:auto;opacity:.08;pointer-events:none;user-select:none}
+.watermark{width:min(74%,620px);height:auto;opacity:.08;pointer-events:none;user-select:none;transform:rotate(-8deg)}
 .console-resizer{flex:none;height:9px;cursor:ns-resize;display:flex;align-items:center;justify-content:center;background:transparent;touch-action:none}
 .console-resizer::before{content:"";width:64px;height:3px;border-radius:2px;background:var(--bd)}
 .console-resizer:hover::before,.console-resizer.drag::before{background:var(--ac)}
@@ -297,7 +297,7 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
   </div>
   <div class="body" id="model-body">
    <button class="ib panel-close" id="model-close" data-tip="Fechar esta página e voltar ao painel" data-pos="bottom-left" aria-label="Fechar página" hidden></button>
-   <svg class="watermark" id="model-watermark" viewBox="0 0 512 512" aria-hidden="true" hidden><g fill="none" stroke="currentColor" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"><path d="M256 140 A116 116 0 0 0 256 372"/><path d="M256 140 L352 372"/></g><circle cx="240" cy="300" r="30" fill="currentColor"/></svg>
+   <svg class="watermark" id="model-watermark" viewBox="0 0 64 64" aria-hidden="true" hidden><g transform="translate(0 3)" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14L20 23L10 32M9 41H21"/></g><g transform="translate(0 3)" fill="currentColor"><path d="M44 23Q46.66 34.34 58 37Q46.66 39.66 44 51Q41.34 39.66 30 37Q41.34 34.34 44 23Z"/><path d="M53 8.5Q54.235 13.765 59.5 15Q54.235 16.235 53 21.5Q51.765 16.235 46.5 15Q51.765 13.765 53 8.5Z"/></g></svg>
    <div class="dashboard-overview" id="dashboard-overview">
     <article class="dashboard-card" id="host-evaluation"></article>
     <article class="dashboard-card" id="research-evaluation"></article>
@@ -1434,7 +1434,7 @@ $('#terminal-close').onclick=()=>{consoleVisible=false;landingVisible=true;rende
 $('#model-close').onclick=()=>{landingVisible=false;render()};
 $('#app-help-close').onclick=()=>{appHelpVisible=false;landingVisible=true;render()};
 $('#cli-help-close').onclick=()=>{helpVisible=false;landingVisible=true;render()};
-(()=>{const rz=$('#console-resizer'),tp=$('#terminal-panel');let drag=false,startY=0,startH=0;const apply=h=>{const max=Math.max(180,window.innerHeight-220);const v=Math.max(140,Math.min(max,h));tp.style.height=v+'px';tp.style.flex='none';};rz.addEventListener('pointerdown',e=>{drag=true;startY=e.clientY;startH=tp.getBoundingClientRect().height;rz.classList.add('drag');rz.setPointerCapture(e.pointerId);e.preventDefault();});rz.addEventListener('pointermove',e=>{if(!drag)return;apply(startH+(startY-e.clientY));});const end=e=>{if(!drag)return;drag=false;rz.classList.remove('drag');try{rz.releasePointerCapture(e.pointerId)}catch{};if(typeof fitConsole==='function')fitConsole();};rz.addEventListener('pointerup',end);rz.addEventListener('pointercancel',end);rz.addEventListener('dblclick',()=>{tp.style.height='';tp.style.flex='';if(typeof fitConsole==='function')fitConsole();});})();
+(()=>{const rz=$('#console-resizer'),tp=$('#terminal-panel');let drag=false,startY=0,startH=0;const apply=h=>{const parentH=(tp.parentElement&&tp.parentElement.clientHeight)||window.innerHeight;const max=Math.max(180,parentH-120);const v=Math.max(140,Math.min(max,h));tp.style.height=v+'px';tp.style.flex='0 0 auto';tp.style.minHeight='0';};rz.addEventListener('pointerdown',e=>{drag=true;startY=e.clientY;startH=tp.getBoundingClientRect().height;rz.classList.add('drag');rz.setPointerCapture(e.pointerId);e.preventDefault();});rz.addEventListener('pointermove',e=>{if(!drag)return;apply(startH+(startY-e.clientY));});const end=e=>{if(!drag)return;drag=false;rz.classList.remove('drag');try{rz.releasePointerCapture(e.pointerId)}catch{};if(typeof fitConsole==='function')fitConsole();};rz.addEventListener('pointerup',end);rz.addEventListener('pointercancel',end);rz.addEventListener('dblclick',()=>{tp.style.height='';tp.style.flex='';tp.style.minHeight='';if(typeof fitConsole==='function')fitConsole();});})();
 
 /* tooltips com seta e posicionamento inteligente */
 const tip=$('#tip'),ts=tip.querySelector('span'),ta=tip.querySelector('i');
