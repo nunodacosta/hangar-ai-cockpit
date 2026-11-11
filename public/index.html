@@ -59,18 +59,7 @@ aside{width:290px;flex:none;background:var(--pn);border-right:1px solid var(--bd
 section{flex:1;display:flex;flex-direction:column;min-width:0}
 .hd{position:sticky;top:0;z-index:5;height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--bd)}
 .hd h2{flex:1;margin:0;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.body{flex:1;overflow:auto;padding:20px;position:relative}
-.panel-close{position:absolute;top:12px;right:14px;z-index:3;width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:var(--mu);background:var(--pn);border:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.10)}
-.panel-close:hover{color:var(--tx);border-color:var(--ac)}
-.panel-close[hidden]{display:none}
-#model-body>.panel-close{position:fixed;top:64px;right:calc(var(--rp,300px) + 16px)}
-.app-help-panel{padding-right:64px}
-.body.is-empty{display:grid;place-items:center;overflow:hidden}
-.watermark{width:min(52%,420px);height:auto;opacity:.07;pointer-events:none;user-select:none}
-.console-resizer{flex:none;height:9px;cursor:ns-resize;display:flex;align-items:center;justify-content:center;background:transparent;touch-action:none}
-.console-resizer::before{content:"";width:64px;height:3px;border-radius:2px;background:var(--bd)}
-.console-resizer:hover::before,.console-resizer.drag::before{background:var(--ac)}
-.console-resizer[hidden]{display:none}
+.body{flex:1;overflow:auto;padding:20px}
 .terminal-panel{position:relative;flex:1;min-width:0;min-height:0;margin:16px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #29313e;border-radius:14px;background:#111720;color:#d7e2ee;font:13px/1.5 Consolas,"Cascadia Mono",monospace}
 .terminal-meta{border-radius:13px 13px 0 0}
 .terminal-output{position:relative;width:100%;min-width:0;min-height:0;overflow:hidden;contain:paint}
@@ -292,8 +281,6 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
    <button class="ib dg" id="un" data-tip="Desinstalar as AI assinaladas. Será pedida confirmação" data-pos="bottom-left"></button>
   </div>
   <div class="body" id="model-body">
-   <button class="ib panel-close" id="model-close" data-tip="Fechar esta página e voltar ao painel" data-pos="bottom-left" aria-label="Fechar página" hidden></button>
-   <svg class="watermark" id="model-watermark" viewBox="0 0 512 512" aria-hidden="true" hidden><g fill="none" stroke="currentColor" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"><path d="M256 140 A116 116 0 0 0 256 372"/><path d="M256 140 L352 372"/></g><circle cx="240" cy="300" r="30" fill="currentColor"/></svg>
    <div class="dashboard-overview" id="dashboard-overview">
     <article class="dashboard-card" id="host-evaluation"></article>
     <article class="dashboard-card" id="research-evaluation"></article>
@@ -312,9 +299,8 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
    <div class="search-history" id="search-history" hidden><h3>Pesquisas por área</h3><div id="search-history-list"></div></div>
   </div>
   <div class="body" id="body" hidden></div>
-  <div class="console-resizer" id="console-resizer" role="separator" aria-orientation="horizontal" aria-label="Redimensionar a altura da consola" data-tip="Arraste para redimensionar a altura da consola" data-pos="top" hidden></div>
   <div class="cli-help-panel" id="cli-help-panel" hidden></div>
-  <div class="cli-help-panel app-help-panel" id="app-help-panel" hidden><button class="ib panel-close" id="app-help-close" data-tip="Fechar a ajuda e voltar ao painel" data-pos="bottom-left" aria-label="Fechar ajuda" hidden></button></div>
+  <div class="cli-help-panel app-help-panel" id="app-help-panel" hidden></div>
   <div class="terminal-panel" id="terminal-panel" hidden>
    <div class="terminal-meta"><span class="terminal-shell-label" id="terminal-shell-label">PowerShell</span><div class="terminal-tab-carousel" id="terminal-tab-carousel"><div class="terminal-tabs" id="terminal-tabs"></div></div><button class="ib terminal-meta-new" id="terminal-new" data-tip="Nova conversa com as entidades selecionadas" data-pos="bottom" aria-label="Nova conversa"></button><button class="ib terminal-meta-close" id="terminal-close" data-tip="Ocultar a consola e voltar ao painel, mantendo as sessões ativas" data-pos="bottom-left" aria-label="Fechar consola"></button></div>
    <div class="terminal-output" id="terminal-output" aria-label="Consolas de conversa"></div>
@@ -368,7 +354,7 @@ const $=s=>document.querySelector(s);
 const TK=document.querySelector('meta[name=t]').content;
 const api=(u,o={})=>fetch(u,{...o,headers:{'x-token':TK,...(o.headers||{})}});
 (()=>{const b=document.querySelector('.tb .brand b'),s=document.querySelector('.tb .tb-sub');if(!b||!s)return;const t=b.getBoundingClientRect().width;s.style.letterSpacing='0px';const w=s.getBoundingClientRect().width,n=s.textContent.length;s.style.letterSpacing=Math.max(0,(t-w)/n)+'px';})();
-$('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').setAttribute('aria-label','Reanalisar instalações do sistema');$('#dp').innerHTML=ic('radar');$('#cli-help').innerHTML=ic('cliHelp');$('#app-help').innerHTML=ic('info');$('#launch').innerHTML=ic('launch');$('#terminal-new').innerHTML=ic('plus');$('#terminal-close').innerHTML=ic('x');$('#un').innerHTML=ic('trash');$('#model-close').innerHTML=ic('x');$('#app-help-close').innerHTML=ic('x');
+$('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').setAttribute('aria-label','Reanalisar instalações do sistema');$('#dp').innerHTML=ic('radar');$('#cli-help').innerHTML=ic('cliHelp');$('#app-help').innerHTML=ic('info');$('#launch').innerHTML=ic('launch');$('#terminal-new').innerHTML=ic('plus');$('#terminal-close').innerHTML=ic('x');$('#un').innerHTML=ic('trash');
 $('#dok').innerHTML=ic('ok');$('#dno').innerHTML=ic('x');$('#bmin').innerHTML=ic('min');$('#bmax').innerHTML=ic('max');$('#bx').innerHTML=ic('x');
 $('#refresh-models').innerHTML=ic('catalog');$('#model-search-go').innerHTML=ic('search');
 $('#add-source-submit').innerHTML=ic('linkAdd');
@@ -1035,7 +1021,7 @@ function render(){
  const activeTab=currentConversation();
  if(consoleVisible)$('#ttl').textContent=activeTab?`${activeTab.type==='model'?'Conversa':'Consola'} — ${activeTab.name}`:'Consola interativa';
  if(helpVisible){const model=installedModels.find(item=>item.id===activeInstalledModel);$('#ttl').textContent=`Ajuda — ${model?.name||selectedCli()?.name||'CLIs'}`;}
- $('#model-body').hidden=consoleVisible||helpVisible||appHelpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||appHelpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#console-resizer').hidden=!consoleVisible;const modelEmpty=!consoleVisible&&!helpVisible&&!appHelpVisible&&modelLanding&&!S.length&&!activeInstalledModel&&!activeSource;$('#model-close').hidden=!modelLanding||modelEmpty;$('#model-watermark').hidden=!modelEmpty;$('#model-body').classList.toggle('is-empty',modelEmpty);$('#app-help-close').hidden=!appHelpVisible;$('#cli-help-panel').hidden=!helpVisible;$('#app-help-panel').hidden=!appHelpVisible;$('#app-help').classList.toggle('on',appHelpVisible);$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
+ $('#model-body').hidden=consoleVisible||helpVisible||appHelpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||appHelpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#cli-help-panel').hidden=!helpVisible;$('#app-help-panel').hidden=!appHelpVisible;$('#app-help').classList.toggle('on',appHelpVisible);$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
  activeChatModel=activeTab&&activeTab.type==='model'?activeTab.entityId:'';
  selectedDirectory=activeTab&&activeTab.directory||'';
  $('#terminal-panel').classList.toggle('chat-mode',!!activeChatModel);
@@ -1139,7 +1125,6 @@ function fitConsole(){
   tab.fitAddon.fit();if(W&&tab.type!=='model'&&tab.started)W.resizeConsole(tab.id,tab.terminal.cols,tab.terminal.rows);
  });
 }
-window.fitConsole=fitConsole;
 function ensureConversationHost(tab){
  let host=$(`#terminal-output [data-session-output="${tab.id}"]`);
  if(!host){host=document.createElement('div');host.className='terminal-session-output';host.dataset.sessionOutput=tab.id;host.hidden=tab.id!==activeConversationId;$('#terminal-output').append(host)}
@@ -1415,9 +1400,6 @@ $('#terminal-new').onclick=()=>{
  launchSelection();
 };
 $('#terminal-close').onclick=()=>{consoleVisible=false;render()};
-$('#model-close').onclick=()=>{activeInstalledModel='';activeChatModel='';activeSource='';dashboardStartup=false;render()};
-$('#app-help-close').onclick=()=>{appHelpVisible=false;render()};
-(()=>{const rz=$('#console-resizer'),tp=$('#terminal-panel');let drag=false,startY=0,startH=0;const apply=h=>{const max=Math.max(180,window.innerHeight-220);const v=Math.max(140,Math.min(max,h));tp.style.height=v+'px';tp.style.flex='none';};rz.addEventListener('pointerdown',e=>{drag=true;startY=e.clientY;startH=tp.getBoundingClientRect().height;rz.classList.add('drag');rz.setPointerCapture(e.pointerId);e.preventDefault();});rz.addEventListener('pointermove',e=>{if(!drag)return;apply(startH+(startY-e.clientY));});const end=e=>{if(!drag)return;drag=false;rz.classList.remove('drag');try{rz.releasePointerCapture(e.pointerId)}catch{};if(typeof fitConsole==='function')fitConsole();};rz.addEventListener('pointerup',end);rz.addEventListener('pointercancel',end);rz.addEventListener('dblclick',()=>{tp.style.height='';tp.style.flex='';if(typeof fitConsole==='function')fitConsole();});})();
 
 /* tooltips com seta e posicionamento inteligente */
 const tip=$('#tip'),ts=tip.querySelector('span'),ta=tip.querySelector('i');
