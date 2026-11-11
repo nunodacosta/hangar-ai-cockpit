@@ -353,7 +353,7 @@ const $=s=>document.querySelector(s);
 const TK=document.querySelector('meta[name=t]').content;
 const api=(u,o={})=>fetch(u,{...o,headers:{'x-token':TK,...(o.headers||{})}});
 (()=>{const b=document.querySelector('.tb .brand b'),s=document.querySelector('.tb .tb-sub');if(!b||!s)return;const t=b.getBoundingClientRect().width;s.style.letterSpacing='0px';const w=s.getBoundingClientRect().width,n=s.textContent.length;s.style.letterSpacing=Math.max(0,(t-w)/n)+'px';})();
-$('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').setAttribute('aria-label','Reanalisar instalações do sistema');$('#dp').innerHTML=ic('radar');$('#cli-help').innerHTML=ic('cliHelp');$('#launch').innerHTML=ic('launch');$('#terminal-new').innerHTML=ic('plus');$('#terminal-close').innerHTML=ic('x');$('#un').innerHTML=ic('trash');
+$('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').setAttribute('aria-label','Reanalisar instalações do sistema');$('#dp').innerHTML=ic('radar');$('#cli-help').innerHTML=ic('cliHelp');$('#app-help').innerHTML=ic('info');$('#launch').innerHTML=ic('launch');$('#terminal-new').innerHTML=ic('plus');$('#terminal-close').innerHTML=ic('x');$('#un').innerHTML=ic('trash');
 $('#dok').innerHTML=ic('ok');$('#dno').innerHTML=ic('x');$('#bmin').innerHTML=ic('min');$('#bmax').innerHTML=ic('max');$('#bx').innerHTML=ic('x');
 $('#refresh-models').innerHTML=ic('catalog');$('#model-search-go').innerHTML=ic('search');
 $('#add-source-submit').innerHTML=ic('linkAdd');
