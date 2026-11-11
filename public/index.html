@@ -103,6 +103,24 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
 .model-chat-note{flex:none;padding:0 12px 8px;background:#151d28;color:#aab8ca;font-size:10px}
 .cli-help-panel{flex:1;min-height:0;overflow:auto;padding:20px}
 .cli-help-panel[hidden]{display:none}
+.app-help-panel{padding:26px 30px 40px}
+.app-help-panel h2{margin:0 0 6px;font-size:22px}
+.app-help-panel h3{margin:26px 0 10px;font-size:16px;letter-spacing:.02em}
+.app-help-panel p{max-width:78ch;line-height:1.55}
+.app-help-lead{color:var(--mu);margin:0 0 18px}
+.app-help-shot{margin:14px 0 22px;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--pn)}
+.app-help-shot img{display:block;width:100%;height:auto}
+.app-help-shot figcaption{padding:9px 12px;border-top:1px solid var(--bd);color:var(--mu);font-size:12px}
+.app-help-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin:12px 0 6px}
+.app-help-card{border:1px solid var(--bd);border-radius:11px;padding:12px 14px;background:var(--pn)}
+.app-help-card h4{margin:0 0 5px;font-size:13px}
+.app-help-card p{margin:0;color:var(--mu);font-size:12px;line-height:1.5}
+.license-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.license-row:last-child{border-bottom:0}
+.license-row .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.license-row code{color:var(--mu);font-size:12px}
+.license-row a{color:var(--ac);font-weight:600}
+.license-text{margin:10px 0 0;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--hv);color:var(--tx);font-size:12px;line-height:1.5;white-space:pre-wrap;max-height:260px;overflow:auto}
 .cli-help-content{max-width:900px;margin:0 auto}
 .cli-help-content h3{margin:20px 0 8px;font-size:15px}.cli-help-content p{color:var(--mu)}
 .cli-help-card{margin:10px 0;padding:14px;border:1px solid var(--bd);border-radius:12px;background:var(--pn)}
@@ -257,6 +275,7 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
    <button class="ib" id="rs" aria-label="Reanalisar instalações do sistema" data-tip="Reanalisar as localizações comuns do sistema" data-pos="bottom"></button>
    <button class="ib" id="dp" data-tip="Pesquisa recursiva em todo o disco, pelas pastas do utilizador primeiro" data-pos="bottom"></button>
    <button class="ib" id="cli-help" aria-label="Ajuda do CLI selecionado" data-tip="Ver comandos e exemplos do CLI selecionado" data-pos="bottom"></button>
+   <button class="ib" id="app-help" aria-label="Como funciona a aplicação" data-tip="Como funciona a aplicação, com capturas e licenças" data-pos="bottom"></button>
    <button class="ib" id="launch" aria-label="Iniciar consola interativa" data-tip="Abrir consola interativa do sistema: PowerShell ou CMD" data-pos="bottom"></button>
    <button class="ib dg" id="un" data-tip="Desinstalar as AI assinaladas. Será pedida confirmação" data-pos="bottom-left"></button>
   </div>
@@ -280,6 +299,7 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
   </div>
   <div class="body" id="body" hidden></div>
   <div class="cli-help-panel" id="cli-help-panel" hidden></div>
+  <div class="cli-help-panel app-help-panel" id="app-help-panel" hidden></div>
   <div class="terminal-panel" id="terminal-panel" hidden>
    <div class="terminal-meta"><span class="terminal-shell-label" id="terminal-shell-label">PowerShell</span><div class="terminal-tab-carousel" id="terminal-tab-carousel"><div class="terminal-tabs" id="terminal-tabs"></div></div><button class="ib terminal-meta-new" id="terminal-new" data-tip="Nova conversa com as entidades selecionadas" data-pos="bottom" aria-label="Nova conversa"></button><button class="ib terminal-meta-close" id="terminal-close" data-tip="Ocultar a consola e voltar ao painel, mantendo as sessões ativas" data-pos="bottom-left" aria-label="Fechar consola"></button></div>
    <div class="terminal-output" id="terminal-output" aria-label="Consolas de conversa"></div>
@@ -337,7 +357,7 @@ $('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').s
 $('#dok').innerHTML=ic('ok');$('#dno').innerHTML=ic('x');$('#bmin').innerHTML=ic('min');$('#bmax').innerHTML=ic('max');$('#bx').innerHTML=ic('x');
 $('#refresh-models').innerHTML=ic('catalog');$('#model-search-go').innerHTML=ic('search');
 $('#add-source-submit').innerHTML=ic('linkAdd');
-let items=[],sel=new Set(),chosen=new Set(),es=null,filter='',installedModels=[],incompleteModels=[],selectedInstalledModels=new Set(),installedModelsLoaded=false,settingsLoaded=false,activeInstalledModel='',onlineSearchController=null,savedSearches=[],activeSearchId='',consoleVisible=false,helpVisible=false,helpRequest=null,helpRequestId=0,helpTargetId='',activeChatModel='',selectedDirectory='',consoleShellLabel='PowerShell',conversationTabs=[],activeConversationId='',conversationCounter=0,dashboardStartup=true;
+let items=[],sel=new Set(),chosen=new Set(),es=null,filter='',installedModels=[],incompleteModels=[],selectedInstalledModels=new Set(),installedModelsLoaded=false,settingsLoaded=false,activeInstalledModel='',onlineSearchController=null,savedSearches=[],activeSearchId='',consoleVisible=false,helpVisible=false,appHelpVisible=false,helpRequest=null,helpRequestId=0,helpTargetId='',activeChatModel='',selectedDirectory='',consoleShellLabel='PowerShell',conversationTabs=[],activeConversationId='',conversationCounter=0,dashboardStartup=true;
 const key=(id,p)=>id+'|'+p;
 const st=t=>$('#st').textContent=t, busy=b=>$('#bar').style.display=b?'block':'none';
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -430,9 +450,86 @@ async function loadSelectedCliHelp(){
   showToast('error',`Não foi possível obter a ajuda de ${item.name}: ${error.message}`);
  }finally{if(requestId===helpRequestId)helpRequest=null}
 }
+const APP_LICENSES=[
+ {name:'Hangar — AI Cockpit',version:'1.0.0',license:'MIT (código) + NOTICE (conceito, design e interação)',url:'https://github.com/nunodacosta/hangar-ai-cockpit/blob/main/LICENSE'},
+ {name:'Electron',version:'45.3.0',license:'MIT',url:'https://github.com/electron/electron/blob/main/LICENSE'},
+ {name:'electron-builder',version:'25.1.8',license:'MIT',url:'https://github.com/electron-userland/electron-builder/blob/master/LICENSE'},
+ {name:'node-pty',version:'1.1.0',license:'MIT',url:'https://github.com/microsoft/node-pty/blob/main/LICENSE'},
+ {name:'@xterm/xterm',version:'6.0.0',license:'MIT',url:'https://github.com/xtermjs/xterm.js/blob/master/LICENSE'},
+ {name:'@xterm/addon-fit',version:'0.11.0',license:'MIT',url:'https://github.com/xtermjs/xterm.js/blob/master/LICENSE'}
+];
+const MIT_TEXT=`MIT License
+
+Copyright (c) 2026 ALDACO — Alexandre da Costa
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.`;
+function appHelpShot(file,caption){return `<figure class="app-help-shot"><img src="/help/${esc(file)}" alt="${esc(caption)}" loading="lazy"><figcaption>${esc(caption)}</figcaption></figure>`}
+function renderAppHelp(){
+ const rows=APP_LICENSES.map(item=>`<div class="license-row"><span class="n">${esc(item.name)}</span><code>${esc(item.version)}</code><code>${esc(item.license)}</code><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">ler licença</a></div>`).join('');
+ $('#app-help-panel').innerHTML=`<div class="app-help-content">
+  <h2>Como funciona o Hangar</h2>
+  <p class="app-help-lead">Esta ajuda explica a aplicação, não o CLI selecionado. Para comandos de um agente ou modelo use o ícone de ajuda ao lado.</p>
+  <h3>1. Arranque sem AI selecionada</h3>
+  <p>A aplicação abre sem modelo nem agente predefinido. Valida o equipamento, o sistema e o catálogo, e entrega o controlo antes de qualquer conversa começar.</p>
+  ${appHelpShot('arranque.png','Arranque: nenhuma AI selecionada, catálogo por analisar.')}
+  <h3>2. Uma consola por AI, em paralelo</h3>
+  <p>Cada AI assinalada abre o seu separador e a sua própria sessão. Alternar de separador muda a conversa e mantém o contexto das restantes.</p>
+  ${appHelpShot('conversa.png','Duas sessões abertas, cada uma no seu separador.')}
+  <h3>3. Painel em cartões e cor de estado</h3>
+  <p>Agentes e modelos aparecem em cartões, com o mesmo desenho dos repositórios. As caixas de seleção usam a cor da interface e mudam de cor conforme a ação pendente.</p>
+  ${appHelpShot('cartoes.png','Cartões de agentes com nome, pastas e versão.')}
+  ${appHelpShot('perigo.png','Ícone de eliminação ativo: caixas e ícone a vermelho.')}
+  <h3>4. Menu flutuante da consola</h3>
+  <p>Um ícone desmultiplica-se em quatro ações e desloca-se ao longo da margem da consola. O deslocamento está limitado a uma largura de ícone para lá da margem, para que o ícone inteiro permaneça acessível sem tapar o conteúdo.</p>
+  ${appHelpShot('menu.png','Menu flutuante aberto sobre a consola.')}
+  <h3>5. Pesquisa de modelos por tema</h3>
+  <p>Um termo escrito pelo utilizador, como apoio jurídico ou consultor financeiro, produz um relatório ordenado face ao equipamento, com a origem de cada resultado.</p>
+  ${appHelpShot('pesquisa.png','Resultados da pesquisa por tema, com ranking face ao host.')}
+  <h3>6. Vigilância de instalações e novidades</h3>
+  <div class="app-help-grid">
+   <article class="app-help-card"><h4>Novas instalações</h4><p>A aplicação observa as pastas de instalação e o armazenamento do Ollama. Quando surge um agente ou modelo novo, atualiza a lista e mostra uma notificação.</p></article>
+   <article class="app-help-card"><h4>Novidades dos repositórios</h4><p>As fontes com feed RSS ou Atom são consultadas periodicamente. Cada novidade é anunciada numa notificação com ligação para a origem.</p></article>
+   <article class="app-help-card"><h4>Fontes com feed</h4><p>Ollama (versões, Atom) e Hugging Face (blog, RSS). GitHub e GitLab expõem Atom por repositório; OpenRouter, ModelScope, Kaggle, Papers with Code, Replicate e Civitai não têm feed público.</p></article>
+  </div>
+  <h3>7. Licenças</h3>
+  <p>O código do Hangar é livre, gratuito e de código aberto, sem limites de utilização nem assinatura. O conceito, o design e o fluxo de funcionamento são propriedade intelectual da ALDACO, Alexandre da Costa, e essa autoria tem de ser preservada em qualquer reutilização.</p>
+  <div class="app-help-grid">
+   <article class="app-help-card"><h4>MIT para o código</h4><p>Uso, cópia, modificação, fusão, publicação, distribuição, sublicenciamento e venda, desde que o aviso de copyright e a licença sejam mantidos.</p></article>
+   <article class="app-help-card"><h4>NOTICE para o conceito</h4><p>A atribuição a ALDACO, Alexandre da Costa, no conceito, design e fluxo de interação deve acompanhar qualquer trabalho derivado ou apresentação pública.</p></article>
+   <article class="app-help-card"><h4>Sem custo</h4><p>Não há licença paga, conta obrigatória, telemetria nem cobrança por conversa.</p></article>
+  </div>
+  <div class="license-list">${rows}</div>
+  <p style="margin-top:14px"><button class="ib" id="license-toggle" data-tip="Mostrar o texto integral da licença MIT" aria-label="Mostrar o texto integral da licença MIT">${ic('info')}</button> <span style="color:var(--mu);font-size:12px">Texto integral da licença MIT aplicada ao código</span></p>
+  <pre class="license-text" id="license-text" hidden>${esc(MIT_TEXT)}</pre>
+ </div>`;
+}
+$('#app-help-panel').addEventListener('click',event=>{
+ const toggle=event.target.closest('#license-toggle');if(!toggle)return;
+ const text=$('#license-text');text.hidden=!text.hidden;
+});
 $('#cli-help').onclick=()=>{
- helpVisible=!helpVisible;consoleVisible=false;render();
+ helpVisible=!helpVisible;appHelpVisible=false;consoleVisible=false;render();
  if(helpVisible)showCliHelp();
+};
+$('#app-help').onclick=()=>{
+ appHelpVisible=!appHelpVisible;helpVisible=false;consoleVisible=false;render();
+ if(appHelpVisible)renderAppHelp();
 };
 $('#cli-help-panel').addEventListener('click',event=>{
  const pickerButton=event.target.closest('.cli-help-select');
@@ -844,9 +941,35 @@ async function bootManager(){
   scan();
   refreshDashboard();
   watchInstalls();
+  watchNews();
  },450);
 }
 let installWatch=null,installChangeRunning=false;
+let newsTimer=null,newsRunning=false;
+function seenNews(){try{return new Set(JSON.parse(localStorage.getItem('hangar.news.seen')||'[]'))}catch{return new Set()}}
+function markNews(urls){try{const seen=seenNews();urls.forEach(u=>seen.add(u));localStorage.setItem('hangar.news.seen',JSON.stringify([...seen].slice(-400)))}catch{}}
+async function checkNews(announce=true){
+ if(newsRunning)return;newsRunning=true;
+ try{
+  const response=await fetch('/api/news?t='+encodeURIComponent(TK));
+  if(!response.ok)return;
+  const data=await response.json();
+  const items=Array.isArray(data.items)?data.items:[];
+  const seen=seenNews();
+  const fresh=items.filter(item=>item.url&&!seen.has(item.url));
+  if(announce&&fresh.length){
+   const first=fresh[0];
+   const extra=fresh.length>1?` (+${fresh.length-1})`:'';
+   showToast('info',`Novidade em ${first.sourceLabel}: ${first.title}${extra}`,'Abrir',()=>{if(first.url)window.open(first.url,'_blank','noopener')});
+  }
+  markNews(items.map(item=>item.url).filter(Boolean));
+ }catch{}finally{newsRunning=false}
+}
+function watchNews(){
+ if(newsTimer)clearInterval(newsTimer);
+ checkNews();
+ newsTimer=setInterval(()=>checkNews(),600000);
+}
 function watchInstalls(){
  if(installWatch)installWatch.close();
  installWatch=new EventSource('/api/watch?t='+encodeURIComponent(TK));
@@ -897,7 +1020,7 @@ function render(){
  const activeTab=currentConversation();
  if(consoleVisible)$('#ttl').textContent=activeTab?`${activeTab.type==='model'?'Conversa':'Consola'} — ${activeTab.name}`:'Consola interativa';
  if(helpVisible){const model=installedModels.find(item=>item.id===activeInstalledModel);$('#ttl').textContent=`Ajuda — ${model?.name||selectedCli()?.name||'CLIs'}`;}
- $('#model-body').hidden=consoleVisible||helpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#cli-help-panel').hidden=!helpVisible;$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
+ $('#model-body').hidden=consoleVisible||helpVisible||appHelpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||appHelpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#cli-help-panel').hidden=!helpVisible;$('#app-help-panel').hidden=!appHelpVisible;$('#app-help').classList.toggle('on',appHelpVisible);$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
  activeChatModel=activeTab&&activeTab.type==='model'?activeTab.entityId:'';
  selectedDirectory=activeTab&&activeTab.directory||'';
  $('#terminal-panel').classList.toggle('chat-mode',!!activeChatModel);

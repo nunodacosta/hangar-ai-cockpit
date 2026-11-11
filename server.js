@@ -493,13 +493,70 @@ async function analyzeCustomSource(source) {
   };
 }
 const SOURCES = [
-  { id: 'ollama', label: 'Ollama Library', url: 'https://ollama.com/library' },
-  { id: 'huggingface', label: 'Hugging Face Hub', url: 'https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads' },
-  { id: 'github', label: 'GitHub', url: 'https://github.com/search?q=local+llm&type=repositories' },
-  { id: 'openrouter', label: 'OpenRouter', url: 'https://openrouter.ai/models' }
+  { id: 'ollama', label: 'Ollama Library', url: 'https://ollama.com/library', rss: 'https://github.com/ollama/ollama/releases.atom', rssLabel: 'Versões do Ollama (Atom)' },
+  { id: 'huggingface', label: 'Hugging Face Hub', url: 'https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads', rss: 'https://huggingface.co/blog/feed.xml', rssLabel: 'Blog do Hugging Face (RSS)' },
+  { id: 'github', label: 'GitHub', url: 'https://github.com/search?q=local+llm&type=repositories', rss: null, rssLabel: 'Atom por repositório: /releases.atom, /commits/main.atom, /tags.atom' },
+  { id: 'openrouter', label: 'OpenRouter', url: 'https://openrouter.ai/models', rss: null, rssLabel: 'Sem feed público; catálogo lido por API' },
+  { id: 'modelscope', label: 'ModelScope', url: 'https://modelscope.cn/models', rss: null, rssLabel: 'Sem feed identificado' },
+  { id: 'kaggle', label: 'Kaggle', url: 'https://www.kaggle.com/models', rss: null, rssLabel: 'Sem feed identificado' },
+  { id: 'paperswithcode', label: 'Papers with Code', url: 'https://paperswithcode.com/', rss: null, rssLabel: 'Sem feed; dados por API' },
+  { id: 'gitlab', label: 'GitLab', url: 'https://gitlab.com/explore/projects/topics/artificial-intelligence', rss: null, rssLabel: 'Atom por projeto: /<projeto>/-/commits/main?format=atom' },
+  { id: 'replicate', label: 'Replicate', url: 'https://replicate.com/explore', rss: null, rssLabel: 'Sem feed identificado' },
+  { id: 'civitai', label: 'Civitai', url: 'https://civitai.com/models', rss: null, rssLabel: 'Sem feed identificado' }
 ];
 function allSources() {
   return [...SOURCES, ...configuredCustomSources()];
+}
+function decodeEntities(value) {
+  return String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'").replace(/&amp;/g, '&').replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+function parseFeed(xml, limit = 12) {
+  const items = [];
+  const blocks = String(xml || '').match(/<(item|entry)\b[\s\S]*?<\/\1>/gi) || [];
+  for (const block of blocks.slice(0, limit)) {
+    const pick = tag => {
+      const match = block.match(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)</${tag}>`, 'i'));
+      return match ? match[1] : '';
+    };
+    const linkMatch = block.match(/<link\b[^>]*href=["']([^"']+)["']/i) || block.match(/<link\b[^>]*>([\s\S]*?)<\/link>/i);
+    const title = decodeEntities(pick('title'));
+    if (!title) continue;
+    const date = decodeEntities(pick('updated') || pick('published') || pick('pubDate') || '');
+    const parsed = date ? new Date(date) : null;
+    items.push({
+      title: title.slice(0, 240),
+      url: decodeEntities(linkMatch ? linkMatch[1] : '').slice(0, 500),
+      summary: decodeEntities(pick('summary') || pick('description') || pick('content')).slice(0, 400),
+      publishedAt: parsed && !Number.isNaN(parsed.getTime()) ? parsed.toISOString() : null
+    });
+  }
+  return items;
+}
+const newsCache = { at: 0, data: null, running: null };
+async function collectNews(force = false) {
+  if (!force && newsCache.data && Date.now() - newsCache.at < 600000) return newsCache.data;
+  if (newsCache.running) return newsCache.running;
+  newsCache.running = (async () => {
+    const feeds = allSources().filter(source => source.rss);
+    const results = await Promise.allSettled(feeds.map(async source => {
+      const items = parseFeed(await fetchText(source.rss));
+      return { id: source.id, label: source.label, feed: source.rss, items };
+    }));
+    const sources = results.map((result, index) => result.status === 'fulfilled'
+      ? { ...result.value, status: 'ok', checkedAt: new Date().toISOString() }
+      : { id: feeds[index].id, label: feeds[index].label, feed: feeds[index].rss, items: [], status: 'error', error: String(result.reason && result.reason.message || result.reason).slice(0, 200), checkedAt: new Date().toISOString() });
+    const items = sources.flatMap(source => source.items.map(item => ({ ...item, source: source.id, sourceLabel: source.label })))
+      .sort((a, b) => String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')))
+      .slice(0, 40);
+    const data = { checkedAt: new Date().toISOString(), sources, items };
+    newsCache.at = Date.now(); newsCache.data = data;
+    log(`novidades: ${items.length} item(ns) de ${sources.filter(s => s.status === 'ok').length} feed(s)`);
+    return data;
+  })().finally(() => { newsCache.running = null; });
+  return newsCache.running;
 }
 async function fetchSource(id, query = '') {
   const source = allSources().find(s => s.id === id);
@@ -1124,6 +1181,10 @@ const server = http.createServer(async (req, res) => {
         const cached = readEncrypted('cli.enc') || {};
         const sources = allSources().map(source => cached.sources && cached.sources.find(item => item.id === source.id) || { ...source, status: 'pending', summary: 'Ainda não analisada.' });
         return json({ sources, agents: Array.isArray(cached.agents) ? cached.agents : [], updatedAt: cached.updatedAt || null });
+      }
+      if (u.pathname === '/api/news' && req.method === 'GET') {
+        try { return json(await collectNews(u.searchParams.get('force') === '1')); }
+        catch (error) { return json({ checkedAt: new Date().toISOString(), sources: [], items: [], error: error.message }, 502); }
       }
       if (u.pathname === '/api/models/cache' && req.method === 'GET') {
         const cached = readEncrypted('cli.enc');

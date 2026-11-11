@@ -1,84 +1,131 @@
 # Hangar — AI Cockpit
 
-Gestor local de agentes e modelos de IA para Windows. Deteta os **CLI** instalados, instala e remove agentes com confirmação explícita, consulta modelos no Ollama, Hugging Face, GitHub e OpenRouter, e abre **uma consola por agente**, todas em paralelo no mesmo ecrã.
+Gestor local de agentes e modelos de IA, com uma consola real por agente e várias
+sessões em paralelo no mesmo ecrã. Aplicação de ambiente de trabalho para Windows,
+construída em Electron, que corre inteiramente na máquina do utilizador.
 
-Livre, gratuito e de código aberto (MIT). Sem conta, sem telemetria, sem limites de utilização.
+Conceito, design e interação: **ALDACO — Alexandre da Costa**.
+Código sob licença **MIT**. Sem custo, sem conta, sem telemetria.
 
 ![Arranque sem AI selecionada](docs/screenshots/arranque.png)
 
 ## Porque existe
 
-Nasceu de uma necessidade concreta: desinstalar as CLI que já existiam na máquina de forma fácil e prática. Do desinstalar passou-se ao instalar, e daí aos automatismos — pesquisa na web a partir dos repositórios inscritos e pesquisa de modelos por tema escrito pelo utilizador.
+Nasceu de uma necessidade concreta: desinstalar as CLI de IA que já existiam na
+máquina de forma fácil e prática. Cresceu para uma gestão mais alargada — gerar
+novas instalações com a mesma simplicidade — e depois para automatismos, como a
+pesquisa na web a partir dos repositórios inscritos e a pesquisa de modelos por
+tema escrito pelo utilizador.
 
-## O que o distingue
+## Funcionalidades
 
-- **Várias AIs em simultâneo.** Cada agente escolhido abre o seu separador com a sua própria sessão. Alternar de separador muda a conversa, mantém o contexto e não interrompe as outras.
-- **Arranque sem AI selecionada.** Não há modelo nem agente predefinido: a aplicação valida o equipamento e entrega o controlo ao utilizador.
-- **Inventário único.** Agentes instalados e modelos no mesmo painel, em cartões com nome, pastas e versão.
-- **Cor como linguagem.** As caixas de seleção usam a cor da interface; ficam vermelhas com o ícone de eliminação ativo e verdes com o ícone de conversa ativo — o mesmo controlo, dois significados legíveis sem texto.
-- **Menu flutuante contextual.** Um ícone, quatro ações (diretório, imagem, ficheiros, limpar diretório). Em agentes cola os caminhos na consola; em modelos abre o diálogo nativo do sistema. Arrasta-se com `Ctrl` ao longo da margem da consola, com o deslocamento limitado a uma largura de ícone para lá dessa margem.
+### Arranque sem AI selecionada
+A aplicação abre sem modelo nem agente predefinido. Valida o equipamento, o
+sistema e o catálogo, e entrega o controlo antes de qualquer conversa começar.
 
-| Cartões no painel esquerdo | Ícone de eliminação ativo |
-| --- | --- |
-| ![Cartões](docs/screenshots/cartoes.png) | ![Vermelho](docs/screenshots/perigo.png) |
+### Uma consola por AI, em paralelo
+Cada AI assinalada abre o seu separador e a sua própria sessão. Alternar de
+separador muda a conversa e mantém o contexto das restantes.
 
-| Conversa com ícone verde | Menu flutuante |
-| --- | --- |
-| ![Conversa](docs/screenshots/conversa.png) | ![Menu](docs/screenshots/menu.png) |
+![Duas sessões em paralelo](docs/screenshots/conversa.png)
 
-![Pesquisa de modelos por tema](docs/screenshots/pesquisa.png)
+### Painel em cartões e cor de estado
+Agentes e modelos aparecem em cartões, com o mesmo desenho dos repositórios:
+nome, número de pastas e versão. As caixas de seleção usam a cor da interface e
+mudam de cor conforme a ação pendente.
+
+![Cartões de agentes](docs/screenshots/cartoes.png)
+
+| Estado | Cor | Significado |
+| --- | --- | --- |
+| Repouso | azul da interface | seleção neutra |
+| Ícone de eliminação ativo | vermelho | a seleção vai remover |
+| Ícone de conversa ativo | verde | a seleção vai abrir sessões |
+
+![Ícone de eliminação ativo](docs/screenshots/perigo.png)
+
+### Menu flutuante da consola
+Um ícone desmultiplica-se em quatro ações — diretório de contexto, imagem,
+ficheiros e limpar diretório — e desloca-se ao longo da margem da consola. O
+deslocamento está limitado a uma largura de ícone para lá da margem, para que o
+ícone inteiro permaneça acessível sem tapar o conteúdo.
+
+![Menu flutuante](docs/screenshots/menu.png)
+
+Em agentes, os anexos são colados na consola como caminhos. Em modelos, abre o
+diálogo nativo do sistema para escolher os ficheiros.
+
+### Pesquisa de modelos por tema
+Um termo escrito pelo utilizador — por exemplo *apoio jurídico* ou *consultor
+financeiro* — produz um relatório ordenado face ao equipamento, com a origem de
+cada resultado.
+
+![Pesquisa por tema](docs/screenshots/pesquisa.png)
+
+### Vigilância de instalações e novidades dos repositórios
+- A aplicação observa as pastas de instalação e o armazenamento do Ollama. Quando
+  surge um agente ou modelo novo, atualiza a lista e mostra uma notificação.
+- As fontes com feed RSS ou Atom são consultadas a cada dez minutos. Cada novidade
+  chega como notificação dedicada, com ligação para a origem.
+
+### Ajuda da aplicação, com capturas e licenças
+Um ícone próprio no topo abre a ajuda da aplicação — distinta da ajuda do agente
+ou do modelo — com sete secções ilustradas e uma subsecção de licenças, incluindo
+o texto integral da licença MIT e as bibliotecas de terceiros.
+
+## Repositórios e feeds
+
+| Fonte | Conteúdo | Feed |
+| --- | --- | --- |
+| Ollama Library | modelos para execução local | Atom (versões) |
+| Hugging Face Hub | modelos, datasets, Spaces | RSS (blog) |
+| GitHub | código, agentes, ferramentas | Atom por repositório |
+| OpenRouter | catálogo de modelos cloud | sem feed público |
+| ModelScope | modelos e datasets | sem feed identificado |
+| Kaggle | datasets e notebooks | sem feed identificado |
+| Papers with Code | artigos com código | sem feed; API |
+| GitLab | projetos open-source | Atom por projeto |
+| Replicate | modelos executáveis por API | sem feed identificado |
+| Civitai | modelos de imagem e LoRAs | sem feed identificado |
 
 ## Instalação
 
-### Portátil (sem instalar)
+### Portátil
+`Hangar_Portable.exe` — não instala nada, corre a partir de qualquer pasta.
 
-1. Descarregue `Hangar_Portable.exe` da [última release](../../releases/latest).
-2. Execute o ficheiro. Não escreve no registo nem cria atalhos.
+### Instalador
+`Hangar_Setup.exe` — instalação por utilizador, com atalhos no ambiente de trabalho
+e no menu Iniciar.
 
-### Setup (instalador)
-
-1. Descarregue `Hangar_Setup.exe` da [última release](../../releases/latest).
-2. Escolha a pasta de instalação; são criados atalhos no ambiente de trabalho e no menu Iniciar.
-3. A desinstalação está disponível em Aplicações instaladas.
-
-> Os executáveis não são assinados digitalmente. O Windows SmartScreen pode pedir confirmação em «Mais informações → Executar mesmo assim».
+Ambos são publicados na página de releases deste repositório.
 
 ### A partir do código
-
 ```bash
 npm install
-npm start          # aplicação Electron
-npm run web        # apenas o servidor local, no browser
-npm run dist       # gera portátil e setup em dist/
+npm start
 ```
 
-Requer Node.js 20 ou superior. `node-pty` é compilado na instalação.
+No Windows também pode usar `start.bat`, que instala dependências se faltarem e
+guarda o registo em `data/logs/start-output.log`.
 
-## Como usar
-
-1. Arranque a aplicação — nenhuma AI vem selecionada.
-2. Assinale um ou mais agentes ou modelos no painel esquerdo.
-3. Carregue no ícone de conversa (fica verde) para abrir uma sessão por entidade.
-4. Alterne entre separadores para mudar de conversa sem interromper as restantes.
-5. Use o ícone flutuante para escolher diretório ou anexar imagem e ficheiros.
-
-## Dados e privacidade
-
-- Tudo corre na máquina. O catálogo, o inventário do host e os resultados de pesquisa são guardados em `data/`, cifrados com uma chave protegida pelo `safeStorage` do sistema.
-- Nenhum dado é enviado para servidores da ALDACO. As consultas a fontes externas (Ollama local, Hugging Face, GitHub, OpenRouter) são feitas diretamente a partir da aplicação.
-
-## Estrutura
-
-```
-main.js          processo principal Electron, IPC da consola e do menu
-preload.js       ponte segura para a interface
-server.js        servidor local, catálogo, deteção e cifra
-public/          interface (index.html, ícones, service worker)
-build/           ícones do empacotamento
-tools/           utilitários de desenvolvimento
-docs/screenshots capturas usadas neste README
+Para gerar os binários:
+```bash
+npm run dist
 ```
 
-## Licença
+## Dados
 
-MIT — ver [LICENSE](LICENSE). Conceito, design e interação: Alexandre da Costa / ALDACO.
+Tudo fica na pasta `data/` do projeto ou do utilizador: definições, catálogo
+cifrado e registos. Não há envio de telemetria.
+
+## Licenciamento
+
+- **Código**: MIT. Uso, cópia, modificação, fusão, publicação, distribuição,
+  sublicenciamento e venda, mantendo o aviso de copyright e a licença.
+- **Conceito, design e fluxo de funcionamento**: propriedade intelectual da
+  ALDACO, Alexandre da Costa. A atribuição deve acompanhar qualquer reutilização,
+  trabalho derivado ou apresentação pública. Ver `NOTICE.md`.
+- **Bibliotecas de terceiros**: Electron 45.3.0, electron-builder 25.1.8,
+  node-pty 1.1.0, @xterm/xterm 6.0.0 e @xterm/addon-fit 0.11.0, todas em MIT.
+
+Texto integral em `LICENSE` e na secção de licenças da ajuda da aplicação.
