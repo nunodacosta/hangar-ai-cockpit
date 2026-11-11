@@ -60,14 +60,14 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
 .hd{position:sticky;top:0;z-index:5;height:56px;flex:none;display:flex;align-items:center;gap:4px;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--bd)}
 .hd h2{flex:1;margin:0;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .body{flex:1;overflow:auto;padding:20px;position:relative}
-.panel-close{position:absolute;top:12px;right:14px;z-index:3;width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:var(--mu);background:var(--pn);border:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.10)}
+.panel-close{position:fixed;top:112px;right:calc(var(--rp,300px) + 16px);z-index:3;width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:var(--mu);background:var(--pn);border:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.10)}
 .panel-close:hover{color:var(--tx);border-color:var(--ac)}
 .panel-close[hidden]{display:none}
-#model-body>.panel-close{position:fixed;top:64px;right:calc(var(--rp,300px) + 16px)}
 .app-help-panel{padding-right:64px}
 .body.is-empty{display:grid;place-items:center;overflow:hidden}
 .body.is-empty>*:not(.watermark):not(.panel-close){display:none}
-.watermark{width:min(74%,620px);height:auto;opacity:.08;pointer-events:none;user-select:none;transform:rotate(-8deg)}
+.watermark{width:min(92%,1100px);height:auto;max-height:88%;opacity:.08;pointer-events:none;user-select:none;transform:rotate(-8deg)}
+.watermark[hidden]{display:none}
 .console-resizer{flex:none;height:9px;cursor:ns-resize;display:flex;align-items:center;justify-content:center;background:transparent;touch-action:none}
 .console-resizer::before{content:"";width:64px;height:3px;border-radius:2px;background:var(--bd)}
 .console-resizer:hover::before,.console-resizer.drag::before{background:var(--ac)}
@@ -317,8 +317,10 @@ section{flex:1;display:flex;flex-direction:column;min-width:0}
   </div>
   <div class="body" id="body" hidden></div>
   <div class="console-resizer" id="console-resizer" role="separator" aria-orientation="horizontal" aria-label="Redimensionar a altura da consola" data-tip="Arraste para redimensionar a altura da consola" data-pos="top" hidden></div>
-  <div class="cli-help-panel" id="cli-help-panel" hidden><button class="ib panel-close" id="cli-help-close" data-tip="Fechar a ajuda e voltar ao painel" data-pos="bottom-left" aria-label="Fechar ajuda" hidden></button></div>
-  <div class="cli-help-panel app-help-panel" id="app-help-panel" hidden><button class="ib panel-close" id="app-help-close" data-tip="Fechar a ajuda e voltar ao painel" data-pos="bottom-left" aria-label="Fechar ajuda" hidden></button></div>
+  <div class="cli-help-panel" id="cli-help-panel" hidden></div>
+  <button class="ib panel-close" id="cli-help-close" data-tip="Fechar a ajuda e voltar à página anterior" data-pos="bottom-left" aria-label="Fechar ajuda" hidden></button>
+  <div class="cli-help-panel app-help-panel" id="app-help-panel" hidden></div>
+  <button class="ib panel-close" id="app-help-close" data-tip="Fechar a ajuda e voltar à página anterior" data-pos="bottom-left" aria-label="Fechar ajuda" hidden></button>
   <div class="terminal-panel" id="terminal-panel" hidden>
    <div class="terminal-meta"><span class="terminal-shell-label" id="terminal-shell-label">PowerShell</span><div class="terminal-tab-carousel" id="terminal-tab-carousel"><div class="terminal-tabs" id="terminal-tabs"></div></div><button class="ib terminal-meta-new" id="terminal-new" data-tip="Nova conversa com as entidades selecionadas" data-pos="bottom" aria-label="Nova conversa"></button><button class="ib terminal-meta-close" id="terminal-close" data-tip="Ocultar a consola e voltar ao painel, mantendo as sessões ativas" data-pos="bottom-left" aria-label="Fechar consola"></button></div>
    <div class="terminal-output" id="terminal-output" aria-label="Consolas de conversa"></div>
@@ -376,7 +378,13 @@ $('#go').innerHTML=ic('search');$('#rs').innerHTML=ic('folderSearch');$('#rs').s
 $('#dok').innerHTML=ic('ok');$('#dno').innerHTML=ic('x');$('#bmin').innerHTML=ic('min');$('#bmax').innerHTML=ic('max');$('#bx').innerHTML=ic('x');
 $('#refresh-models').innerHTML=ic('catalog');$('#model-search-go').innerHTML=ic('search');
 $('#add-source-submit').innerHTML=ic('linkAdd');
-let items=[],sel=new Set(),chosen=new Set(),es=null,filter='',installedModels=[],incompleteModels=[],selectedInstalledModels=new Set(),installedModelsLoaded=false,settingsLoaded=false,activeInstalledModel='',onlineSearchController=null,savedSearches=[],activeSearchId='',consoleVisible=false,helpVisible=false,appHelpVisible=false,helpRequest=null,helpRequestId=0,helpTargetId='',activeChatModel='',selectedDirectory='',consoleShellLabel='PowerShell',conversationTabs=[],activeConversationId='',conversationCounter=0,dashboardStartup=true,landingVisible=true;
+let items=[],sel=new Set(),chosen=new Set(),es=null,filter='',installedModels=[],incompleteModels=[],selectedInstalledModels=new Set(),installedModelsLoaded=false,settingsLoaded=false,activeInstalledModel='',onlineSearchController=null,savedSearches=[],activeSearchId='',consoleVisible=false,helpVisible=false,appHelpVisible=false,helpRequest=null,helpRequestId=0,helpTargetId='',activeChatModel='',selectedDirectory='',consoleShellLabel='PowerShell',conversationTabs=[],activeConversationId='',conversationCounter=0,dashboardStartup=true,landingVisible=true,pageStack=[],modelPage=true;
+function currentPage(){return pageStack.length?pageStack[pageStack.length-1]:''}
+function applyPage(id){consoleVisible=id==='console';helpVisible=id==='cli-help';appHelpVisible=id==='app-help';modelPage=id==='sources'||id==='rescan'||id==='recursive';landingVisible=!id;}
+function pushPage(id){if(currentPage()===id)return;pageStack.push(id);applyPage(id);render();}
+function closePage(){pageStack.pop();applyPage(currentPage());render();}
+function hid(sel,v){const e=$(sel);if(!e)return;if(v)e.setAttribute('hidden','');else e.removeAttribute('hidden');}
+applyPage('sources');pageStack=['sources'];
 const key=(id,p)=>id+'|'+p;
 const st=t=>$('#st').textContent=t, busy=b=>$('#bar').style.display=b?'block':'none';
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -543,11 +551,13 @@ $('#app-help-panel').addEventListener('click',event=>{
  const text=$('#license-text');text.hidden=!text.hidden;
 });
 $('#cli-help').onclick=()=>{
- helpVisible=!helpVisible;appHelpVisible=false;consoleVisible=false;render();
+ if(currentPage()==='cli-help'){closePage();return}
+ pushPage('cli-help');
  if(helpVisible)showCliHelp();
 };
 $('#app-help').onclick=()=>{
- appHelpVisible=!appHelpVisible;helpVisible=false;consoleVisible=false;render();
+ if(currentPage()==='app-help'){closePage();return}
+ pushPage('app-help');
  if(appHelpVisible)renderAppHelp();
 };
 $('#cli-help-panel').addEventListener('click',event=>{
@@ -796,7 +806,7 @@ if(sourceController?.sourceId===source&&!sourceController.signal.aborted)return;
 if(sourceController)sourceController.abort();
 const controller=new AbortController();controller.sourceId=source;sourceController=controller;
 const sourceInfo=sourceData.find(item=>item.id===source);
-activeSource=source;consoleVisible=false;helpVisible=false;render();$('#source-loading').classList.add('v');
+activeSource=source;pushPage('sources');render();$('#source-loading').classList.add('v');
 const report=$('#live-source-report');report.hidden=false;report.scrollIntoView({block:'nearest',behavior:'smooth'});
 report.innerHTML=`<h3>${esc(sourceInfo?.label||'Repositório selecionado')}</h3><p>A carregar informação deste repositório…</p>`;
 try{
@@ -1035,11 +1045,11 @@ function render(){
  const S=items.filter(i=>sel.has(i.id));
  $('#ttl').textContent=!S.length?'Modelos recomendados':S.length===1?S[0].name:S.length+' AI selecionadas';
  if(activeInstalledModel)$('#ttl').textContent=installedModels.find(model=>model.id===activeInstalledModel)?.name||'Modelo instalado';
- const modelLanding=dashboardStartup||!S.length||!!activeInstalledModel||!!activeSource;
+ const modelLanding=modelPage;
  const activeTab=currentConversation();
  if(consoleVisible)$('#ttl').textContent=activeTab?`${activeTab.type==='model'?'Conversa':'Consola'} — ${activeTab.name}`:'Consola interativa';
  if(helpVisible){const model=installedModels.find(item=>item.id===activeInstalledModel);$('#ttl').textContent=`Ajuda — ${model?.name||selectedCli()?.name||'CLIs'}`;}
- $('#model-body').hidden=consoleVisible||helpVisible||appHelpVisible||!modelLanding;$('#body').hidden=consoleVisible||helpVisible||appHelpVisible||modelLanding;$('#terminal-panel').hidden=!consoleVisible;$('#console-resizer').hidden=!consoleVisible;const modelEmpty=!consoleVisible&&!helpVisible&&!appHelpVisible&&!landingVisible;$('#model-close').hidden=!modelLanding||modelEmpty;$('#model-watermark').hidden=!modelEmpty;$('#model-body').classList.toggle('is-empty',modelEmpty);$('#app-help-close').hidden=!appHelpVisible;$('#cli-help-close').hidden=!helpVisible;$('#cli-help-panel').hidden=!helpVisible;$('#app-help-panel').hidden=!appHelpVisible;$('#app-help').classList.toggle('on',appHelpVisible);$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
+ const landingEmpty=!currentPage();$('#model-body').hidden=consoleVisible||helpVisible||appHelpVisible||(!modelLanding&&!landingEmpty);$('#body').hidden=consoleVisible||helpVisible||appHelpVisible||modelLanding||landingEmpty;$('#terminal-panel').hidden=!consoleVisible;$('#console-resizer').hidden=!consoleVisible;$('#model-close').hidden=!modelLanding;hid('#model-watermark',!landingEmpty);$('#model-body').classList.toggle('is-empty',landingEmpty);hid('#app-help-close',!appHelpVisible);hid('#cli-help-close',!helpVisible);$('#cli-help-panel').hidden=!helpVisible;$('#app-help-panel').hidden=!appHelpVisible;$('#app-help').classList.toggle('on',appHelpVisible);$('#cli-help').classList.toggle('on',helpVisible);$('#cli-help').classList.remove('off');$('#cli-help').setAttribute('aria-disabled','false');const helpModel=installedModels.find(item=>item.id===activeInstalledModel),helpCli=selectedCli();$('#cli-help').setAttribute('aria-label',helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para ajuda');$('#cli-help').dataset.tip=helpModel?`Ajuda de ${helpModel.name||helpModel.id}`:helpCli?`Ajuda de ${helpCli.name}`:'Escolher CLI para consultar a ajuda';$('#launch').classList.toggle('on',consoleVisible);const launchModel=installedModels.find(item=>item.id===activeInstalledModel),launchCliItem=selectedCli();$('#launch').dataset.tip=consoleVisible?'Voltar ao painel mantendo a sessão da consola ativa':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:selectedCount>1?`Iniciar ${selectedCount} conversas, uma por AI selecionada`:'Iniciar consola interativa do sistema: PowerShell ou CMD';$('#launch').setAttribute('aria-label',consoleVisible?'Voltar ao painel':launchModel?`Iniciar ${launchModel.name||launchModel.id}`:launchCliItem?`Iniciar ${launchCliItem.name}`:'Iniciar consola interativa');
  activeChatModel=activeTab&&activeTab.type==='model'?activeTab.entityId:'';
  selectedDirectory=activeTab&&activeTab.directory||'';
  $('#terminal-panel').classList.toggle('chat-mode',!!activeChatModel);
@@ -1099,10 +1109,10 @@ const match=q=>items.find(i=>i.name.toLowerCase().includes(q)||i.id.includes(q))
 async function search(){const q=$('#q').value.trim();filter=q.toLowerCase();render();
  if(!q)return;let i=match(filter);if(i){dashboardStartup=false;pick(i);render();return}
  try{const r=await scan([q]),w=r.find(x=>x.id===q.toLowerCase()||x.name.toLowerCase().includes(filter));const f=w&&items.find(x=>x.id===w.id);if(f){dashboardStartup=false;pick(f);render()}else deep([q])}catch{}}
-$('#go').onclick=search;$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+$('#go').onclick=()=>{pushPage('sources');search()};$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
 $('#q').oninput=()=>{filter=$('#q').value.trim().toLowerCase();render()};
-$('#rs').onclick=event=>{event.preventDefault();reanalyzeSystem()};
-$('#dp').onclick=()=>deep($('#q').value.trim()?[$('#q').value.trim()]:[]);
+$('#rs').onclick=event=>{event.preventDefault();pushPage('rescan');reanalyzeSystem()};
+$('#dp').onclick=()=>{pushPage('recursive');deep($('#q').value.trim()?[$('#q').value.trim()]:[])};
 const dlg=(text,ask)=>new Promise(res=>{const d=$('#dlg');$('#dtx').textContent=text;$('#dno').style.display=ask?'':'none';d.classList.add('v');
  const done=v=>{d.classList.remove('v');$('#dok').onclick=$('#dno').onclick=null;document.removeEventListener('keydown',kd);res(v);setTimeout(()=>$('#q').focus(),50)};
  const kd=e=>{if(e.key==='Escape')done(false)};document.addEventListener('keydown',kd);
@@ -1169,7 +1179,7 @@ function closeConversationTab(id){
  try{if(W&&tab.started)W.stopConsole(tab.id)}catch{}
  const host=$(`#terminal-output [data-session-output="${tab.id}"]`);if(host)host.remove();
  conversationTabs.splice(index,1);
- if(!conversationTabs.length){activeConversationId='';consoleVisible=false;activeChatModel='';activeInstalledModel='';render();return}
+ if(!conversationTabs.length){activeConversationId='';activeChatModel='';activeInstalledModel='';closePage();return}
  if(activeConversationId===id){const next=conversationTabs[Math.min(index,conversationTabs.length-1)];activeConversationId=next.id;activeChatModel=next.type==='model'?next.entityId:'';activeInstalledModel=next.type==='model'?next.entityId:''}
  render();fitConsole();
 }
@@ -1177,7 +1187,7 @@ function activateConversation(id){
  const tab=conversationTabs.find(item=>item.id===id);if(!tab)return;
  const openingConsole=!consoleVisible;
  activeConversationId=id;selectedDirectory=tab.directory||'';activeInstalledModel=tab.type==='model'?tab.entityId:'';
- consoleVisible=true;helpVisible=false;activeChatModel=tab.type==='model'?tab.entityId:'';
+ consoleVisible=true;helpVisible=false;appHelpVisible=false;modelPage=false;landingVisible=false;if(currentPage()!=='console')pageStack.push('console');activeChatModel=tab.type==='model'?tab.entityId:'';
  render();initializeTerminal(tab);fitConsole();if(openingConsole)positionContextButtonAtConsoleCorner();
  if(tab.type==='model')$('#model-chat-input').focus();else tab.terminal.focus();
 }
@@ -1238,7 +1248,7 @@ function createConversationTab(type,entityId,name,commandForShell=null){
  }
  const openingConsole=!consoleVisible;
  tab={id:`tab-${Date.now()}-${++conversationCounter}`,type,entityId,name,directory:selectedDirectory||'',terminal:null,fitAddon:null,started:false,starting:false,pendingInput:'',pendingAction:null,pendingDirectoryChange:type==='agent'&&!!selectedDirectory,chatHistory:[],attachments:[],chatRequest:null,initialized:false};
- conversationTabs.push(tab);activeConversationId=tab.id;activeInstalledModel=type==='model'?entityId:'';activeChatModel=type==='model'?entityId:'';consoleVisible=true;helpVisible=false;render();initializeTerminal(tab);
+ conversationTabs.push(tab);activeConversationId=tab.id;activeInstalledModel=type==='model'?entityId:'';activeChatModel=type==='model'?entityId:'';consoleVisible=true;helpVisible=false;appHelpVisible=false;modelPage=false;landingVisible=false;if(currentPage()!=='console')pageStack.push('console');render();initializeTerminal(tab);
  if(openingConsole)positionContextButtonAtConsoleCorner();
  if(type==='model'){
   tab.terminal.writeln(`[Conversa local com ${terminalText(name)} · Ollama]`);
@@ -1422,7 +1432,8 @@ function launchSelection(){
  return first||null;
 }
 $('#launch').onclick=()=>{
- if(consoleVisible){consoleVisible=false;render();return}
+ if(currentPage()==='console'){closePage();return}
+ pushPage('console');
  launchSelection();
 };
 $('#terminal-new').onclick=()=>{
@@ -1430,10 +1441,10 @@ $('#terminal-new').onclick=()=>{
  if(!agents.length&&!models.length){showToast('info','Selecione um ou mais agentes/modelos para iniciar as conversas.');return}
  launchSelection();
 };
-$('#terminal-close').onclick=()=>{consoleVisible=false;landingVisible=true;render()};
-$('#model-close').onclick=()=>{landingVisible=false;render()};
-$('#app-help-close').onclick=()=>{appHelpVisible=false;landingVisible=true;render()};
-$('#cli-help-close').onclick=()=>{helpVisible=false;landingVisible=true;render()};
+$('#terminal-close').onclick=()=>{closePage()};
+$('#model-close').onclick=()=>{closePage()};
+$('#app-help-close').onclick=()=>{closePage()};
+$('#cli-help-close').onclick=()=>{closePage()};
 (()=>{const rz=$('#console-resizer'),tp=$('#terminal-panel');let drag=false,startY=0,startH=0;const apply=h=>{const parentH=(tp.parentElement&&tp.parentElement.clientHeight)||window.innerHeight;const max=Math.max(180,parentH-120);const v=Math.max(140,Math.min(max,h));tp.style.height=v+'px';tp.style.flex='0 0 auto';tp.style.minHeight='0';};rz.addEventListener('pointerdown',e=>{drag=true;startY=e.clientY;startH=tp.getBoundingClientRect().height;rz.classList.add('drag');rz.setPointerCapture(e.pointerId);e.preventDefault();});rz.addEventListener('pointermove',e=>{if(!drag)return;apply(startH+(startY-e.clientY));});const end=e=>{if(!drag)return;drag=false;rz.classList.remove('drag');try{rz.releasePointerCapture(e.pointerId)}catch{};if(typeof fitConsole==='function')fitConsole();};rz.addEventListener('pointerup',end);rz.addEventListener('pointercancel',end);rz.addEventListener('dblclick',()=>{tp.style.height='';tp.style.flex='';tp.style.minHeight='';if(typeof fitConsole==='function')fitConsole();});})();
 
 /* tooltips com seta e posicionamento inteligente */
