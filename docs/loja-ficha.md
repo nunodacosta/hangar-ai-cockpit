@@ -48,6 +48,7 @@ Identidade já aplicada ao manifesto (commit `241b414`).
 | Sistema mínimo | Windows 10 versão 1809 (build 17763), x64 |
 | Arquitetura | x64 |
 | Preço | Gratuito |
+| Modelo de preço | Base price **Free**, sem períodos de teste, sem compras dentro da aplicação |
 | Idioma do pacote | pt-PT, en-US |
 
 ## Funcionalidades a listar (máximo 20)
@@ -108,6 +109,15 @@ confirmação explícita do utilizador, em conformidade com a política 10.1.x.
 2. *Listagem da loja* → colar os textos acima e carregar as sete capturas.
 3. *Classificação etária* → questionário IARC.
 4. *Preços e disponibilidade* → gratuito, mercados pretendidos.
+
+   No Partner Center, em *Preços e disponibilidade*:
+   - **Base price** → `Free`
+   - **Free trial** → `No free trial`
+   - **Purchases** → desativado (a aplicação não tem compras dentro da aplicação)
+   - **Marcados** → todos os mercados onde o pacote é elegível
+
+   A aplicação não tem custo, conta nem telemetria, pelo que não há motivo para
+   preço nem para período de teste.
 5. *Enviar para certificação* — prazo típico de 1 a 3 dias úteis.
 
 Cada nova submissão tem de aumentar a versão: o manifesto exige quatro
