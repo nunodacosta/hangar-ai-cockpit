@@ -35,10 +35,23 @@ if (!fs.existsSync(unpacked)) {
 }
 
 const manifestSource = path.join(root, 'build', 'appx', 'AppxManifest.xml');
-const manifest = fs.readFileSync(manifestSource, 'utf8')
+let manifest = fs.readFileSync(manifestSource, 'utf8')
   .replace(/Version="\d+\.\d+\.\d+\.\d+"/, `Version="${msixVersion}"`);
+
+const identityName = (process.env.MSIX_NAME || '').trim();
+const identityPublisher = (process.env.MSIX_PUBLISHER || '').trim();
+if (identityName) {
+  manifest = manifest.replace(/(<Identity[\s\S]*?Name=")[^"]*(")/, `$1${identityName}$2`);
+}
+if (identityPublisher) {
+  if (!/^CN=.+/.test(identityPublisher)) {
+    console.error('MSIX_PUBLISHER tem de começar por CN=, tal como o Partner Center o apresenta.');
+    process.exit(1);
+  }
+  manifest = manifest.replace(/(<Identity[\s\S]*?Publisher=")[^"]*(")/, `$1${identityPublisher}$2`);
+}
 if (/CN=0{8}-0{4}-0{4}-0{4}-0{12}/.test(manifest)) {
-  console.warn('Aviso: Publisher ainda tem o valor de exemplo. Substitua pelo Publisher do Partner Center antes de submeter.');
+  console.warn('Aviso: Publisher ainda tem o valor de exemplo. Defina MSIX_PUBLISHER com o valor do Partner Center antes de submeter.');
 }
 
 const layout = path.join(root, 'dist', 'appx-layout');

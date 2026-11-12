@@ -26,6 +26,17 @@ O pacote desempacota sem erros e contém o executável, `resources/app.asar`,
    - `Package/Identity/Publisher` → atributo `Publisher` de `<Identity>`
    O valor de `Publisher` tem de coincidir exatamente com o certificado com que a
    Microsoft assina o pacote; se não coincidir, a submissão é rejeitada.
+
+   Em vez de editar o XML à mão, passar os dois valores ao build:
+
+   ```powershell
+   $env:MSIX_NAME = "12345ALDACO.HangarAICockpit"
+   $env:MSIX_PUBLISHER = "CN=1A2B3C4D-0000-0000-0000-000000000000"
+   npm run appx
+   ```
+
+   `tools/build-appx.js` substitui os atributos no manifesto do pacote sem alterar
+   `build/appx/AppxManifest.xml`, e recusa um `Publisher` que não comece por `CN=`.
 4. **Submeter** o `.appx`, preencher a listagem e enviar para certificação.
 
 Sem estes quatro passos nenhuma submissão é possível: o Partner Center exige
