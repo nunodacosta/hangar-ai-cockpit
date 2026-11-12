@@ -6,20 +6,20 @@
   IgnorableNamespaces="uap rescap">
 
   <!--
-    Valores de identidade a substituir pelos que o Partner Center atribui
-    em "Gestor de produtos > Identidade do produto":
-      Name      -> Package/Identity/Name
-      Publisher -> Package/Identity/Publisher
+    Identidade atribuída pelo Partner Center em "Gestor de produtos >
+    Identidade do produto". O Publisher tem de coincidir exatamente com o
+    certificado com que a Microsoft assina o pacote.
+    Podem ser substituídos no build por MSIX_NAME / MSIX_PUBLISHER.
   -->
   <Identity
-    Name="ALDACO.HangarAICockpit"
-    Publisher="CN=00000000-0000-0000-0000-000000000000"
+    Name="AlexandredaCosta.HangarAICockpit"
+    Publisher="CN=A9DA431F-AED2-4437-AE71-F63E7D8FAED3"
     Version="1.0.0.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
     <DisplayName>Hangar - AI Cockpit</DisplayName>
-    <PublisherDisplayName>ALDACO</PublisherDisplayName>
+    <PublisherDisplayName>Alexandre da Costa</PublisherDisplayName>
     <Description>Gestor local de agentes e modelos de IA com consola integrada</Description>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>

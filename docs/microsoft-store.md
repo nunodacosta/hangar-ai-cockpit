@@ -6,8 +6,8 @@ Pacote MSIX/APPX do **Hangar — AI Cockpit** para submissão no Partner Center.
 
 | Item | Caminho | Estado |
 | --- | --- | --- |
-| Pacote | `dist/Hangar_1.1.1.0_x64.appx` | gerado, 162,1 MB, verificado com `makeappx unpack` |
-| Manifesto | `build/appx/AppxManifest.xml` | válido, identidade por preencher |
+| Pacote | `dist/Hangar_1.1.1.0_x64.appx` | gerado, 162,1 MB, identidade do Partner Center verificada com `makeappx unpack` |
+| Manifesto | `build/appx/AppxManifest.xml` | válido, identidade preenchida |
 | Assets | `build/appx/Assets/` | StoreLogo 50, Square44 44, Square150 150, Wide310x150, Splash 620x300 |
 | Script | `tools/build-appx.js` (`npm run appx`) | gera o pacote a partir de `dist/win-unpacked` |
 
@@ -30,13 +30,21 @@ O pacote desempacota sem erros e contém o executável, `resources/app.asar`,
    Em vez de editar o XML à mão, passar os dois valores ao build:
 
    ```powershell
-   $env:MSIX_NAME = "12345ALDACO.HangarAICockpit"
-   $env:MSIX_PUBLISHER = "CN=1A2B3C4D-0000-0000-0000-000000000000"
+   $env:MSIX_NAME = "AlexandredaCosta.HangarAICockpit"
+   $env:MSIX_PUBLISHER = "CN=A9DA431F-AED2-4437-AE71-F63E7D8FAED3"
    npm run appx
    ```
 
    `tools/build-appx.js` substitui os atributos no manifesto do pacote sem alterar
    `build/appx/AppxManifest.xml`, e recusa um `Publisher` que não comece por `CN=`.
+
+   Identidade já aplicada ao manifesto:
+
+   | Campo | Valor |
+   | --- | --- |
+   | `Package/Identity/Name` | `AlexandredaCosta.HangarAICockpit` |
+   | `Package/Identity/Publisher` | `CN=A9DA431F-AED2-4437-AE71-F63E7D8FAED3` |
+   | `Package/Properties/PublisherDisplayName` | `Alexandre da Costa` |
 4. **Submeter** o `.appx`, preencher a listagem e enviar para certificação.
 
 Sem estes quatro passos nenhuma submissão é possível: o Partner Center exige
