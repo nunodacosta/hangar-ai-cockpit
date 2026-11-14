@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt"><head><meta charset="utf-8">
 <meta name="t" content="__TOKEN__"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hangar — AI Cockpit</title>
+<title>Hangar AI Cockpit</title>
 <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/vendor/xterm.css">
 <style>
 :root{--bg:#f5f6f8;--pn:#fff;--bd:#e3e6ec;--tx:#1d2330;--mu:#6b7385;--ac:#4f7cff;--dg:#e5484d;--hv:#eef1f7}
@@ -478,8 +478,9 @@ async function loadSelectedCliHelp(){
   showToast('error',`Não foi possível obter a ajuda de ${item.name}: ${error.message}`);
  }finally{if(requestId===helpRequestId)helpRequest=null}
 }
+const APP_VERSION=new URLSearchParams(location.search).get('v')||'dev';
 const APP_LICENSES=[
- {name:'Hangar — AI Cockpit',version:'1.0.0',license:'MIT (código) + NOTICE (conceito, design e interação)',url:'https://github.com/nunodacosta/hangar-ai-cockpit/blob/main/LICENSE'},
+ {name:'Hangar AI Cockpit',version:APP_VERSION,license:'MIT (código) + NOTICE (conceito, design e interação)',url:'https://github.com/nunodacosta/hangar-ai-cockpit/blob/main/LICENSE'},
  {name:'Electron',version:'45.3.0',license:'MIT',url:'https://github.com/electron/electron/blob/main/LICENSE'},
  {name:'electron-builder',version:'25.1.8',license:'MIT',url:'https://github.com/electron-userland/electron-builder/blob/master/LICENSE'},
  {name:'node-pty',version:'1.1.0',license:'MIT',url:'https://github.com/microsoft/node-pty/blob/main/LICENSE'},
@@ -545,6 +546,13 @@ function renderAppHelp(){
   <div class="license-list">${rows}</div>
   <p style="margin-top:14px"><button class="ib" id="license-toggle" data-tip="Mostrar o texto integral da licença MIT" aria-label="Mostrar o texto integral da licença MIT">${ic('info')}</button> <span style="color:var(--mu);font-size:12px">Texto integral da licença MIT aplicada ao código</span></p>
   <pre class="license-text" id="license-text" hidden>${esc(MIT_TEXT)}</pre>
+  <h3>8. Privacidade, IA e denúncia</h3>
+  <p>O Hangar não tem conta, telemetria nem servidores próprios. As conversas, anexos e pedidos seguem apenas para os agentes ou modelos que o utilizador escolher, incluindo o Ollama local ou os fornecedores externos que configurar. O conteúdo gerado por IA é produzido por esses modelos, não pela ALDACO.</p>
+  <div class="app-help-grid">
+   <article class="app-help-card"><h4>Política de privacidade</h4><p>O que fica na máquina, o que sai e como apagar os dados.</p><a href="https://github.com/nunodacosta/hangar-ai-cockpit/blob/main/PRIVACY.md" target="_blank" rel="noopener noreferrer">ler a política</a></article>
+   <article class="app-help-card"><h4>Denunciar conteúdo</h4><p>Respostas impróprias ou comportamento inesperado de um modelo podem ser reportados ao autor da aplicação.</p><a href="https://github.com/nunodacosta/hangar-ai-cockpit/issues/new?title=Den%C3%BAncia%20de%20conte%C3%BAdo&amp;body=Descreva%20a%20resposta%2C%20o%20agente%20ou%20modelo%20e%20a%20fonte%20usada." target="_blank" rel="noopener noreferrer">abrir denúncia</a></article>
+   <article class="app-help-card"><h4>Software de terceiros</h4><p>As CLIs e os modelos não fazem parte do Hangar. São instalados a partir das fontes oficiais, apenas depois de o utilizador confirmar.</p></article>
+  </div>
  </div>`;
 }
 $('#app-help-panel').addEventListener('click',event=>{

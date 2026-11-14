@@ -1,13 +1,22 @@
 {
   "name": "hangar",
-  "version": "1.1.1",
-  "description": "Hangar - AI Cockpit: gestor local de agentes e modelos de IA (CLI) com consola integrada",
+  "version": "1.1.2",
+  "description": "Hangar AI Cockpit: gestor local de agentes e modelos de IA (CLI) com consola integrada",
   "main": "main.js",
+  "license": "MIT",
+  "homepage": "https://github.com/nunodacosta/hangar-ai-cockpit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nunodacosta/hangar-ai-cockpit.git"
+  },
   "scripts": {
     "start": "electron .",
     "web": "node server.js",
     "dist": "electron-builder --win",
-    "appx": "node tools/build-appx.js"
+    "dist:dir": "electron-builder --win --dir",
+    "appx": "node tools/build-appx.js",
+    "store": "npm run dist:dir && npm run appx",
+    "assets:appx": "python tools/gen-appx-assets.py"
   },
   "devDependencies": {
     "electron": "^45.3.0",
@@ -16,7 +25,7 @@
   "author": "ALDACO",
   "build": {
     "appId": "com.aldaco.hangar",
-    "productName": "Hangar - AI Cockpit",
+    "productName": "Hangar AI Cockpit",
     "npmRebuild": false,
     "directories": {
       "output": "dist"

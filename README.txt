@@ -1,4 +1,4 @@
-Hangar - AI Cockpit (codigo-fonte)
+Hangar AI Cockpit (codigo-fonte)
 
 O conceito do nome: Hangar
   Um hangar é o local onde uma frota de aeronaves fica estacionada,
@@ -14,7 +14,7 @@ O conceito do nome: Hangar
   linha de comandos é a manche deste cockpit.
 
 Software a que pode ser alternativa
-  Hangar - AI Cockpit é um gestor local de IA para Windows: deteta os
+  Hangar AI Cockpit é um gestor local de IA para Windows: deteta os
   agentes CLI instalados, instala e conversa com modelos Ollama e abre
   uma consola interativa por agente, com inventário do host e resultados
   guardados cifrados. Na mesma categoria, pode ser uma alternativa

@@ -1,6 +1,6 @@
 # Canal alternativo
 
-Este repositório é o espelho alternativo de **Hangar — AI Cockpit**.
+Este repositório é o espelho alternativo de **Hangar AI Cockpit**.
 O repositório principal é `hangar-ai-cockpit`.
 
 ## Porque existe

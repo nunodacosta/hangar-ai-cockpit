@@ -1,6 +1,6 @@
 # NOTICE — atribuição
 
-Hangar — AI Cockpit
+Hangar AI Cockpit
 Copyright (c) 2026 ALDACO — Alexandre da Costa
 
 O código-fonte é distribuído sob a licença MIT (ver `LICENSE`): é livre, gratuito
@@ -15,7 +15,7 @@ vídeos e material de divulgação.
 
 Atribuição recomendada:
 
-> Baseado em Hangar — AI Cockpit, conceito, design e interação de
+> Baseado em Hangar AI Cockpit, conceito, design e interação de
 > ALDACO, Alexandre da Costa. Código sob licença MIT.
 
 ## Bibliotecas de terceiros

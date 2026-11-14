@@ -1,4 +1,4 @@
-# Hangar — AI Cockpit
+# Hangar AI Cockpit
 
 Gestor local de agentes e modelos de IA, com uma consola real por agente e várias
 sessões em paralelo no mesmo ecrã. Aplicação de ambiente de trabalho para Windows,
@@ -99,6 +99,24 @@ e no menu Iniciar.
 
 Ambos são publicados na página de releases deste repositório.
 
+### Microsoft Store
+O Hangar é publicado na Microsoft Store como aplicação Windows (MSIX/APPX), com
+o nome **Hangar AI Cockpit**. A versão da loja é atualizada pela própria Store
+e corre com a mesma funcionalidade da versão de ambiente de trabalho.
+
+O pacote é gerado e validado localmente:
+
+```bash
+npm run store        # dist/win-unpacked + dist/Hangar_<versao>_x64.appx
+npm run appx         # só empacota um dist/win-unpacked já existente
+npm run assets:appx  # regenera ícones e escalas MSIX
+```
+
+O pacote não é assinado: a Microsoft Store assina-o na publicação. Para instalar
+localmente é preciso Modo de Programador ou um certificado de teste — instruções
+em [`docs/microsoft-store.md`](docs/microsoft-store.md) e textos da ficha em
+[`docs/loja-ficha.md`](docs/loja-ficha.md).
+
 ### A partir do código
 ```bash
 npm install
@@ -116,7 +134,11 @@ npm run dist
 ## Dados
 
 Tudo fica na pasta `data/` do projeto ou do utilizador: definições, catálogo
-cifrado e registos. Não há envio de telemetria.
+cifrado e registos. Na versão MSIX a pasta de instalação é só de leitura e os
+dados ficam em `%APPDATA%\Hangar\data`. Não há envio de telemetria.
+
+A política de privacidade completa está em [`PRIVACY.md`](PRIVACY.md) e é a URL
+indicada na ficha da loja.
 
 ## Licenciamento
 

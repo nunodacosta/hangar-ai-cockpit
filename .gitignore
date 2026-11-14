@@ -22,3 +22,11 @@ perfil.png
 # Sistema
 Thumbs.db
 desktop.ini
+
+# Pacotes e certificados de assinatura (nunca versionar)
+*.appx
+*.msix
+*.pfx
+*.p12
+*.cer
+wack-report.xml

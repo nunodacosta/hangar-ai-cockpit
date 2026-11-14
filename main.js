@@ -4,8 +4,26 @@ const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const pty = require('node-pty');
 const { start } = require('./server');
+// Pasta de dados portátil: junto ao exe (portable/instalado) ou ao código (dev).
+// Em MSIX a pasta de instalação (WindowsApps) é só de leitura e cai no perfil do utilizador.
+function pickDataDir() {
+  const base = process.env.PORTABLE_EXECUTABLE_DIR || (app.isPackaged ? path.dirname(process.execPath) : __dirname);
+  const d = path.join(base, 'data');
+  try { fs.mkdirSync(d, { recursive: true }); fs.accessSync(d, fs.constants.W_OK); return d; }
+  catch { // pasta só de leitura (ex.: Program Files ou WindowsApps): recorre ao perfil do utilizador
+    const root = app.getPath('appData'), n = path.join(root, 'Hangar'), o = path.join(root, 'AI CLI Manager');
+    let target = n;
+    // migra dados antigos para o nome novo; se o rename falhar (ficheiros em uso) usa a pasta antiga
+    if (!fs.existsSync(n) && fs.existsSync(o)) { try { fs.renameSync(o, n); } catch { target = o; } }
+    const f = path.join(target, 'data');
+    fs.mkdirSync(f, { recursive: true }); return f;
+  }
+}
+const DATA = pickDataDir();
+app.setPath('userData', path.join(DATA, 'electron'));
+app.setPath('sessionData', path.join(DATA, 'electron'));
 // evita que um erro não tratado (ex.: falha ao arrancar o Ollama) feche a aplicação
-const crashLog = (kind, error) => { try { fs.appendFileSync(path.join(__dirname, 'data', 'logs', 'crash.log'), `${new Date().toISOString()} ${kind}: ${error && error.stack || error}\n`); } catch {} };
+const crashLog = (kind, error) => { try { const dir = path.join(DATA, 'logs'); fs.mkdirSync(dir, { recursive: true }); fs.appendFileSync(path.join(dir, 'crash.log'), `${new Date().toISOString()} ${kind}: ${error && error.stack || error}\n`); } catch {} };
 process.on('uncaughtException', error => { console.error('uncaughtException:', error); crashLog('uncaughtException', error); });
 process.on('unhandledRejection', error => { console.error('unhandledRejection:', error); crashLog('unhandledRejection', error); });
 // Correcao de arranque: nesta maquina o processo GPU do Chromium, quando arranca dentro do
@@ -17,22 +35,6 @@ app.commandLine.appendSwitch('disable-gpu-sandbox');
 // arranque do renderer com o mesmo 0xC0000135, deixando a janela sem interface. Quando isso
 // acontece a app reabre-se uma unica vez com --no-sandbox (ver render-process-gone).
 let sandboxFallback = process.argv.includes('--no-sandbox');
-
-// Pasta de dados portátil: junto ao exe (portable/instalado) ou ao código (dev)
-function pickDataDir() {
-  const base = process.env.PORTABLE_EXECUTABLE_DIR || (app.isPackaged ? path.dirname(process.execPath) : __dirname);
-  const d = path.join(base, 'data');
-  try { fs.mkdirSync(d, { recursive: true }); fs.accessSync(d, fs.constants.W_OK); return d; }
-  catch { // pasta só de leitura (ex.: Program Files): recorre ao perfil do utilizador
-    const root = app.getPath('appData'), n = path.join(root, 'Hangar'), o = path.join(root, 'AI CLI Manager');
-    if (!fs.existsSync(n) && fs.existsSync(o)) { try { fs.renameSync(o, n); } catch {} } // migra dados antigos para o nome novo
-    const f = fs.existsSync(n) ? path.join(n, 'data') : path.join(o, 'data');
-    fs.mkdirSync(f, { recursive: true }); return f;
-  }
-}
-const DATA = pickDataDir();
-app.setPath('userData', path.join(DATA, 'electron'));
-app.setPath('sessionData', path.join(DATA, 'electron'));
 const SANDBOX_MARKER = path.join(DATA, 'sandbox-unavailable');
 if (!sandboxFallback && fs.existsSync(SANDBOX_MARKER)) sandboxFallback = true;
 if (sandboxFallback) app.commandLine.appendSwitch('no-sandbox');
@@ -116,7 +118,9 @@ app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(
 const readCfg = () => { try { return JSON.parse(fs.readFileSync(path.join(DATA, 'settings.json'), 'utf8')); } catch { return {}; } };
 const saveBounds = b => { const f = path.join(DATA, 'settings.json'); try { fs.writeFileSync(f, JSON.stringify({ ...readCfg(), bounds: b }, null, 2)); } catch {} };
 
-app.setAppUserModelId('com.aldaco.hangar');
+// Em MSIX a identidade (AUMID) e atribuida pelo pacote; substitui-la quebra
+// notificacoes e a fixacao na barra de tarefas. Fora do pacote mantem-se o ID proprio.
+if (!process.windowsStore) app.setAppUserModelId('com.aldaco.hangar');
 if (gotLock) app.whenReady().then(async () => {
   const port = await start(DATA, getDataKey());
   const b = readCfg().bounds || {};
@@ -146,7 +150,7 @@ if (gotLock) app.whenReady().then(async () => {
   });
   w.once('ready-to-show', () => { w.show(); w.focus(); w.webContents.focus(); });
   w.on('focus', () => w.webContents.focus());
-  w.loadURL('http://127.0.0.1:' + port);
+  w.loadURL('http://127.0.0.1:' + port + '/?v=' + encodeURIComponent(app.getVersion()));
   ipcMain.on('console:start', startConsole);
   ipcMain.on('console:input', writeConsole);
   ipcMain.on('console:resize', resizeConsole);
