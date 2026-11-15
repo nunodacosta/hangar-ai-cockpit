@@ -117,6 +117,24 @@ localmente é preciso Modo de Programador ou um certificado de teste — instru�
 em [`docs/microsoft-store.md`](docs/microsoft-store.md) e textos da ficha em
 [`docs/loja-ficha.md`](docs/loja-ficha.md).
 
+### winget
+
+Depois de o manifesto ser aceite em `microsoft/winget-pkgs`:
+
+```powershell
+winget install --id ALDACO.HangarAICockpit
+```
+
+O pacote usa o instalador NSIS (`Hangar_Setup.exe`), não o `.appx`. Para gerar e
+validar os manifestos localmente:
+
+```powershell
+npm run winget
+winget validate --manifest winget\manifests\a\ALDACO\HangarAICockpit\1.1.2
+```
+
+Detalhes e processo de submissão em [`docs/winget.md`](docs/winget.md).
+
 ### A partir do código
 ```bash
 npm install

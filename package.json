@@ -17,6 +17,7 @@
     "appx": "node tools/build-appx.js",
     "store": "npm run dist:dir && npm run appx",
     "store:verify": "node tools/verify-appx.js",
+    "winget": "node tools/gen-winget.js",
     "assets:appx": "python tools/gen-appx-assets.py"
   },
   "devDependencies": {

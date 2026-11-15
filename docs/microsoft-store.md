@@ -382,6 +382,8 @@ máquina limpa com o SDK completo.
   entregues pela Store.
 - **Assinatura**: o `.appx` gerado não é assinado de propósito. A Store
   re-assina; para sideload é preciso um certificado próprio.
+- **winget**: canal alternativo, com o instalador NSIS em vez do `.appx`;
+  manifestos e processo em `docs/winget.md`.
 
 ## Checklist de release
 
