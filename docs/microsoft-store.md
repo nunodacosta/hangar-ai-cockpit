@@ -43,6 +43,27 @@ O script:
 - confirma que os cinco assets base e o executável declarado existem;
 - grava o SHA-256 ao lado do pacote.
 
+### Verificar o pacote
+
+```powershell
+npm run store:verify                     # dist/Hangar_<versao>_x64.appx
+npm run store:verify -- outro.appx       # pacote específico
+```
+
+`tools/verify-appx.js` desempacota o pacote e confirma, sem depender do
+`build-appx.js`:
+
+- `Package/Identity/Name`, `Publisher`, `Version` e `ProcessorArchitecture`
+  iguais aos valores do Partner Center e do `package.json`;
+- `DisplayName` igual a `build.productName` (`Hangar AI Cockpit`);
+- executável declarado presente depois de desempacotar;
+- as cinco referências `Assets\*.png` do manifesto resolvem;
+- os 45 assets do pacote são **byte a byte** iguais a `build/appx/Assets`;
+- ausência de `AppxSignature.p7x` (o pacote vai sem assinatura).
+
+Termina com o tamanho e o SHA-256; qualquer falha devolve código de saída 1 e a
+mensagem `Pacote NAO pronto para submeter`.
+
 ## O que só o titular da conta pode fazer
 
 1. **Conta de programador** em <https://partner.microsoft.com/dashboard>.
@@ -94,7 +115,8 @@ autenticação da conta e a certificação é feita por revisores da Microsoft.
 
 ## Sequência de submissão
 
-1. `npm run store` — gera `dist/Hangar_1.1.2.0_x64.appx`.
+1. `npm run store` e `npm run store:verify` — gera `dist/Hangar_1.1.2.0_x64.appx`
+   e valida identidade, versão, executável, assets e assinatura.
 2. Partner Center → produto existente (`9PNQQJB7S4ZV`, nome `Hangar AI Cockpit`)
    → *Product identity*: nada a alterar.
 3. *Product identity* → confirmar `Name` (`AlexandredaCosta.HangarAICockpit`) e
@@ -360,3 +382,20 @@ máquina limpa com o SDK completo.
   entregues pela Store.
 - **Assinatura**: o `.appx` gerado não é assinado de propósito. A Store
   re-assina; para sideload é preciso um certificado próprio.
+
+## Checklist de release
+
+Repetir em cada versão enviada à Store:
+
+1. Subir `version` em `package.json` (o manifesto usa `X.Y.Z.0`).
+2. `npm run store` — reconstrói `dist/win-unpacked` e o `.appx`.
+3. `npm run store:verify` — tem de terminar em `Pacote pronto para submeter`.
+4. Commit e tag anotada `vX.Y.Z`, com o SHA-256 do pacote na mensagem da tag.
+5. `npm run dist` — instaladores NSIS e portátil para a release do GitHub; o
+   código empacotado é o mesmo, por isso o `.appx` já gerado continua válido.
+6. `git push` do ramo e da tag; `gh release create vX.Y.Z` com os três
+   artefactos (instalador, portátil e `.appx`).
+7. Carregar o `.appx` no Partner Center e seguir a sequência de submissão acima.
+8. Depois de instalar a versão nova, se o ícone antigo persistir, seguir
+   "O ícone antigo continua a aparecer".
+
