@@ -18,11 +18,13 @@
     "store": "npm run dist:dir && npm run appx",
     "store:verify": "node tools/verify-appx.js",
     "winget": "node tools/gen-winget.js",
+    "docs:pdf": "node tools/build-docs-pdf.js && electron tools/print-docs-pdf.js",
     "assets:appx": "python tools/gen-appx-assets.py"
   },
   "devDependencies": {
     "electron": "^45.3.0",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "pdf-lib": "^1.17.1"
   },
   "author": "ALDACO",
   "build": {
