@@ -5,8 +5,9 @@ Manifestos do **Hangar AI Cockpit** para o repositório comunitário
 o `winget install`.
 
 PR aberto em 2026-11-15:
-<https://github.com/microsoft/winget-pkgs/pull/480635> (aguarda as verificações
-automáticas e a revisão de um moderador).
+<https://github.com/microsoft/winget-pkgs/pull/480635>. As verificações
+automáticas (01 a 10) e o acordo de licença de contribuidor estão concluídos com
+sucesso; falta a aprovação de um moderador da comunidade.
 
 ## Identidade do pacote
 
